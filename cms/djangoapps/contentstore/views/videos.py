@@ -39,6 +39,7 @@ from edxval.api import (
 )
 from opaque_keys.edx.keys import CourseKey
 from pytz import UTC
+from storages.backends.s3boto3 import S3Boto3Storage, S3Key
 
 from contentstore.models import VideoUploadConfig
 from contentstore.utils import reverse_course_url
@@ -815,18 +816,22 @@ def storage_service_bucket():
             'aws_secret_access_key': credentials['secret_key'],
             'security_token': credentials['session_token']
         }
+        conn = s3.connection.S3Connection(**params)
     else:
-        params = {
-            'aws_access_key_id': settings.AWS_ACCESS_KEY_ID,
-            'aws_secret_access_key': settings.AWS_SECRET_ACCESS_KEY
-        }
+        conn = s3_connection()
 
-    conn = s3.connection.S3Connection(**params)
     # We don't need to validate our bucket, it requires a very permissive IAM permission
     # set since behind the scenes it fires a HEAD request that is equivalent to get_all_keys()
     # meaning it would need ListObjects on the whole bucket, not just the path used in each
     # environment (since we share a single bucket for multiple deployments in some configurations)
     return conn.get_bucket(settings.VIDEO_UPLOAD_PIPELINE["BUCKET"], validate=False)
+
+
+def s3_connection():
+    """
+    Returns a properly authenticated connection object to S3.
+    """
+    return S3BotoStorage().connection
 
 
 def storage_service_key(bucket, file_name):
@@ -837,7 +842,7 @@ def storage_service_key(bucket, file_name):
         settings.VIDEO_UPLOAD_PIPELINE.get("ROOT_PATH", ""),
         file_name
     )
-    return s3.key.Key(bucket, key_name)
+    return S3Key(bucket, key_name)
 
 
 def send_video_status_update(updates):

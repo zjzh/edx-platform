@@ -376,8 +376,8 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
         assert_bad({"files": [{"file_name": "test.mp4"}]})
 
     @override_settings(AWS_ACCESS_KEY_ID="test_key_id", AWS_SECRET_ACCESS_KEY="test_secret")
-    @patch("boto.s3.key.Key")
-    @patch("boto.s3.connection.S3Connection")
+    @patch("contentstore.views.videos.S3Key")
+    @patch("contentstore.views.videos.s3_connection")
     @ddt.data(
         (
             [
@@ -440,7 +440,7 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
             self.assertEqual(response['error'], "Request 'files' entry contain unsupported content_type")
 
     @override_settings(AWS_ACCESS_KEY_ID='test_key_id', AWS_SECRET_ACCESS_KEY='test_secret')
-    @patch('boto.s3.connection.S3Connection')
+    @patch('contentstore.views.videos.s3_connection')
     def test_upload_with_non_ascii_charaters(self, mock_conn):
         """
         Test that video uploads throws error message when file name contains special characters.
@@ -500,8 +500,8 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
             )
 
     @override_settings(AWS_ACCESS_KEY_ID='test_key_id', AWS_SECRET_ACCESS_KEY='test_secret')
-    @patch('boto.s3.key.Key')
-    @patch('boto.s3.connection.S3Connection')
+    @patch('contentstore.views.videos.S3Key')
+    @patch('contentstore.views.videos.s3_connection')
     def test_post_success(self, mock_conn, mock_key):
         files = [
             {
@@ -543,10 +543,7 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
         self.assertEqual(response.status_code, 200)
         response_obj = json.loads(response.content.decode('utf-8'))
 
-        mock_conn.assert_called_once_with(
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
-        )
+        mock_conn.assert_called_once_with()
         self.assertEqual(len(response_obj['files']), len(files))
         self.assertEqual(mock_key.call_count, len(files))
         for i, file_info in enumerate(files):
@@ -594,8 +591,8 @@ class VideosHandlerTestCase(VideoUploadTestMixin, CourseTestCase):
             self.assertEqual(response_file['upload_url'], mock_key_instance.generate_url())
 
     @override_settings(AWS_ACCESS_KEY_ID='test_key_id', AWS_SECRET_ACCESS_KEY='test_secret')
-    @patch('boto.s3.key.Key')
-    @patch('boto.s3.connection.S3Connection')
+    @patch('contentstore.views.videos.S3Key')
+    @patch('contentstore.views.videos.s3_connection')
     @ddt.data(
         {
             'global_waffle': True,
@@ -1402,8 +1399,8 @@ class TranscriptPreferencesTestCase(VideoUploadTestBase, CourseTestCase):
     )
     @ddt.unpack
     @override_settings(AWS_ACCESS_KEY_ID='test_key_id', AWS_SECRET_ACCESS_KEY='test_secret')
-    @patch('boto.s3.key.Key')
-    @patch('boto.s3.connection.S3Connection')
+    @patch('contentstore.views.videos.S3Key')
+    @patch('contentstore.views.videos.s3_connection')
     @patch('contentstore.views.videos.get_transcript_preferences')
     def test_transcript_preferences_metadata(self, transcript_preferences, is_video_transcript_enabled,
                                              mock_transcript_preferences, mock_conn, mock_key):
