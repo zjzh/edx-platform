@@ -4,6 +4,7 @@ VerticalBlock - an XBlock which renders its children in a column.
 
 
 import logging
+import operator
 from copy import copy
 from functools import reduce
 
@@ -18,6 +19,8 @@ from xmodule.studio_editable import StudioEditableBlock
 from xmodule.util.xmodule_django import add_webpack_to_fragment
 from xmodule.x_module import PUBLIC_VIEW, STUDENT_VIEW, XModuleFields
 from xmodule.xml_module import XmlParserMixin
+from openedx.core.lib.defer import defer, wait, map
+
 
 log = logging.getLogger(__name__)
 
@@ -74,20 +77,27 @@ class VerticalBlock(SequenceFields, XModuleFields, StudioEditableBlock, XmlParse
         child_context['child_of_vertical'] = True
         is_child_of_vertical = context.get('child_of_vertical', False)
 
-        # pylint: disable=no-member
-        for child in child_blocks:
+        futures = []
+        def _render_child(args):
+            index, child, child_context = args
             child_block_context = copy(child_context)
-            if child in list(child_blocks_to_complete_on_view):
+
+            if child in child_blocks_to_complete_on_view:
                 child_block_context['wrap_xblock_data'] = {
                     'mark-completed-on-view-after-delay': complete_on_view_delay
                 }
             rendered_child = child.render(view, child_block_context)
             fragment.add_fragment_resources(rendered_child)
-
-            contents.append({
+            return {
+                'idx': index,
                 'id': six.text_type(child.location),
                 'content': rendered_child.content
-            })
+            }
+
+        contents = sorted(
+            map(_render_child, [(index, child, child_context) for index, child in enumerate(child_blocks)]),
+            key=operator.itemgetter('idx')
+        )
 
         fragment_context = {
             'items': contents,
