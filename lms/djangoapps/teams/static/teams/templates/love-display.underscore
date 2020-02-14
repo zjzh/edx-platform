@@ -1,0 +1,35 @@
+<div class="teammate-love-container">
+    <h4><%- gettext("Teammate Love") %></h4><br>
+    <div class="received-love-container">
+        <% _(received_loves).each(function(love) { %>
+            <div class="received-love alert-success">
+                <span class="recieved-love-message">" <%= love.message %> "</span>
+                <span class="recieved-love-sender"><b>-<%= love.sender %></b></span>
+            </div>
+        <% }) %>
+    </div>
+
+    <div class="love-sender">
+        <span><%- gettext("Send a teammate some love! You can send one per week!") %></span><br>
+        <div class="love-sender-select">
+            <label for="love-teammate-select"><%- gettext("Teammate:") %></label>
+            <select id="love-teammate-select">
+                <% _(memberships).each(function(membership) { if (membership.user.username === username) {return;} %>
+                    <option value='<%= membership.user.username %>'><%= membership.user.username %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div class="love-sender-select">
+            <label for="love-message-select"><%- gettext("Message:") %></label>
+            <select id="love-message-select">
+                <% _(messages).each(function(message) { %>
+                    <option value='<%= message.id %>'><%= message.text %></option>
+                <% }) %>
+            </select>
+        </div>
+        <div class="send-love">
+            <button class="btn send-love-btn"><%- gettext("Send Love!") %></button>
+        </div>
+    </div>
+</div>
+

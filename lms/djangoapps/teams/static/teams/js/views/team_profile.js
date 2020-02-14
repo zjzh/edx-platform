@@ -12,16 +12,18 @@
         'common/js/components/utils/view_utils',
         'teams/js/views/team_utils',
         'text!teams/templates/team-profile.underscore',
-        'text!teams/templates/team-member.underscore'
+        'text!teams/templates/team-member.underscore',
+        'text!teams/templates/love-display.underscore'
     ],
         function(Backbone, _, gettext, HtmlUtils, TeamDiscussionView, ViewUtils, TeamUtils,
-                  teamTemplate, teamMemberTemplate) {
+                  teamTemplate, teamMemberTemplate, loveDisplayTemplate) {
             var TeamProfileView = Backbone.View.extend({
 
                 errorMessage: gettext('An error occurred. Try again.'),
 
                 events: {
-                    'click .leave-team-link': 'leaveTeam'
+                    'click .leave-team-link': 'leaveTeam',
+                    'click .send-love-btn': 'sendLove'
                 },
 
                 initialize: function(options) {
@@ -68,6 +70,8 @@
 
                     this.renderTeamMembers();
 
+                    this.renderLove();
+
                     this.setFocusToHeaderFunc();
                     return this;
                 },
@@ -86,9 +90,55 @@
                     });
                 },
 
+                renderLove: function() {
+                    var view = this;
+                    $.ajax({
+                        type: 'GET',
+                        url: view.context.teammateLoveUrl.replace('team_id', view.model.get('id'))
+                    }).done(function(data) {
+                        HtmlUtils.append(
+                            view.$('.teammate-love'),
+                            HtmlUtils.template(loveDisplayTemplate)({
+                                received_loves: data.results,
+                                memberships: view.model.get('membership'),
+                                messages: view.context.teammateLoveMessages,
+                                username: view.context.userInfo.username
+                            })
+                        );
+                    }).fail(function(data) {
+                        TeamUtils.parseAndShowMessage(data, view.errorMessage);
+                    });
+                },
+
                 selectText: function(event) {
                     event.preventDefault();
                     $(event.currentTarget).select();
+                },
+
+                sendLove: function(event) {
+                    event.preventDefault();
+                    var view = this;
+                    var messageSelection = this.$('#love-message-select option:selected');
+                    var teammateSelection = this.$('#love-teammate-select option:selected');
+                    ViewUtils.confirmThenRunOperation(
+                        gettext('Send Teammate Love?'),
+                        gettext('Message: "') + messageSelection.text() + gettext('" Recipient: ') + teammateSelection.text(),
+                        gettext('Confirm'),
+                        function() {
+                            $.ajax({
+                                type: 'POST',
+                                url: view.context.teammateLoveUrl.replace('team_id', view.model.get('id')),
+                                data: {
+                                    recipient: teammateSelection.val(),
+                                    message_id: messageSelection.val()
+                                }
+                            }).done(function() {
+                                TeamUtils.showMessage('Teammate Love Sent!', 'success');
+                            }).fail(function(data) {
+                                TeamUtils.showMessage(data.responseJSON[0]);
+                            });
+                        }
+                    );
                 },
 
                 leaveTeam: function(event) {

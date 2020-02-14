@@ -3,7 +3,7 @@ Django models related to teams functionality.
 """
 
 
-from datetime import datetime
+from datetime import datetime, date
 from uuid import uuid4
 
 import pytz
@@ -346,3 +346,44 @@ class CourseTeamMembership(models.Model):
         emit_team_event('edx.team.activity_updated', membership.team.course_id, {
             'team_id': membership.team.team_id,
         })
+
+
+class TeammateLoveMessage(models.Model):
+    EMPTY_COURSE_ID = CourseKeyField.Empty
+
+    text = models.CharField(max_length=255, blank=False)
+    course_id = CourseKeyField(max_length=255, db_index=True, blank=True)
+
+    class Meta(object):
+        app_label = "teams"
+
+    def __str__(self):
+        return self.text
+
+
+class TeammateLove(models.Model):
+    sender = models.ForeignKey(
+        User,
+        related_name='sent_loves',
+        on_delete=models.CASCADE,
+        blank=False,
+    )
+    recipient = models.ForeignKey(
+        User,
+        related_name='received_loves',
+        on_delete=models.CASCADE,
+        blank=False,
+    )
+    team = models.ForeignKey(
+        CourseTeam,
+        on_delete=models.CASCADE,
+        blank=False,
+    )
+    message = models.ForeignKey(
+        TeammateLoveMessage,
+        blank=False,
+    )
+    created = models.DateField(default=date.today)
+
+    class Meta(object):
+        app_label = "teams"

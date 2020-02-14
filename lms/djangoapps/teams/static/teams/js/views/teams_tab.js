@@ -137,7 +137,8 @@
                     this.manageView = new ManageView({
                         router: this.router,
                         teamEvents: this.teamEvents,
-                        teamMembershipManagementUrl: this.context.teamMembershipManagementUrl
+                        teamMembershipManagementUrl: this.context.teamMembershipManagementUrl,
+                        teammateLoveCourseCountUrl: this.context.teammateLoveCourseCountUrl
                     });
 
                     tabsList = [{

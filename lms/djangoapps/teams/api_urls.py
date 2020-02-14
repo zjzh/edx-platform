@@ -10,6 +10,9 @@ from .views import (
     MembershipBulkManagementView,
     MembershipDetailView,
     MembershipListView,
+    TeammateLoveCourseView,
+    TeammateLoveCourseCountView,
+    TeammateLoveView,
     TeamsDetailView,
     TeamsListView,
     TopicDetailView,
@@ -64,5 +67,26 @@ urlpatterns = [
         ),
         MembershipBulkManagementView.as_view(),
         name="team_membership_bulk_management"
-    )
+    ),
+    url(
+        r'v0/teammate_love/{team_id_pattern}$'.format(
+            team_id_pattern=TEAM_ID_PATTERN,
+        ),
+        TeammateLoveView.as_view(),
+        name="teammate_love"
+    ),
+    url(
+        r'v0/teammate_love/count/{course_id_pattern}$'.format(
+            course_id_pattern=settings.COURSE_ID_PATTERN,
+        ),
+        TeammateLoveCourseCountView.as_view(),
+        name="teammate_love_course_count"
+    ),
+    url(
+        r'v0/teammate_love/course/{course_id_pattern}$'.format(
+            course_id_pattern=settings.COURSE_ID_PATTERN,
+        ),
+        TeammateLoveCourseCountView.as_view(),
+        name="teammate_love_course"
+    ),
 ]

@@ -765,3 +765,43 @@
 .create-team.form-actions {
   margin-top: $baseline;
 }
+
+.teammate-love-container {
+  margin-top: $baseline;
+  padding: $baseline / 2;
+
+  .love-sender {
+    border: 2px solid $gray-l4;
+    margin-top: $baseline / 2;
+    padding: $baseline;  
+
+    .love-sender-select {
+        padding: $baseline / 2;
+    }
+  }
+
+  .received-love {
+    border: 1px solid $green-l4;
+    background-color: $green-l5;
+    padding: $baseline / 3;
+    
+    span {
+        white-space:nowrap;
+    }
+  }
+}
+
+#teammate-love-chart{
+    border: 1px solid $gray-l2;
+    padding: $baseline / 3;
+}
+
+table.teamate-love-count{
+    th, td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid $gray-l4;
+    }
+
+    tr:hover {background-color: $gray-l5;}
+}

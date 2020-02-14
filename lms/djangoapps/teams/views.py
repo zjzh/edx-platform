@@ -3,12 +3,15 @@ HTTP endpoints for the Teams API.
 """
 
 
+import datetime
 import logging
+import json
 
 import six
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import Http404, HttpResponse
@@ -23,7 +26,9 @@ from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
 from rest_framework import permissions, status
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.generics import GenericAPIView
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import GenericAPIView, ListCreateAPIView, ListAPIView
+from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.views import APIView
@@ -31,7 +36,7 @@ from openedx.core.lib.api.authentication import OAuth2Authentication
 
 from lms.djangoapps.courseware.courses import get_course_with_access, has_access
 from lms.djangoapps.discussion.django_comment_client.utils import has_discussion_privileges
-from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
+from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership, TeammateLove, TeammateLoveMessage
 from openedx.core.lib.api.parsers import MergePatchParser
 from openedx.core.lib.api.permissions import IsStaffOrReadOnly
 from openedx.core.lib.api.view_utils import (
@@ -63,6 +68,8 @@ from .serializers import (
     CourseTeamCreationSerializer,
     CourseTeamSerializer,
     MembershipSerializer,
+    TeammateLoveSerializer,
+    TeammateLoveMessageSerializer,
     TopicSerializer
 )
 from .utils import emit_team_event
@@ -169,6 +176,15 @@ class TeamsDashboardView(GenericAPIView):
             {'expand': ('user',)}
         )
 
+        course_love_messages = TeammateLoveMessage.objects.filter(course_id=course_id)
+        courseless_love_messages = TeammateLoveMessage.objects.filter(course_id=TeammateLoveMessage.EMPTY_COURSE_ID)
+        all_love_messages = course_love_messages | courseless_love_messages
+
+        teammate_love_messages = TeammateLoveMessageSerializer(
+            all_love_messages,
+            many=True,
+        )
+
         context = {
             "course": course,
             "topics": topics_data,
@@ -197,6 +213,10 @@ class TeamsDashboardView(GenericAPIView):
             "countries": list(countries),
             "disable_courseware_js": True,
             "teams_base_url": reverse('teams_dashboard', request=request, kwargs={'course_id': course_id}),
+            "teammate_love_url": reverse('teammate_love', request=request, args=['team_id']),
+            "teammate_love_course_url": reverse('teammate_love_course', request=request, kwargs={'course_id': course_id}),
+            "teammate_love_course_count_url": reverse('teammate_love_course_count', request=request, kwargs={'course_id': course_id}),
+            "teammate_love_messages": teammate_love_messages.data,
         }
         return render_to_response("teams/teams.html", context)
 
@@ -1425,3 +1445,85 @@ class MembershipBulkManagementView(GenericAPIView):
         if not course_module:
             raise Http404('Course not found: {}'.format(course_id))
         return course_module
+
+
+def last_monday():
+    today = datetime.date.today()
+    day_offset = today.weekday()  # Monday is 0 and Sunday is 6, we want the days since Monday. Convenient.
+    return today - datetime.timedelta(days=day_offset)
+
+
+class TeammateLoveView(ListCreateAPIView):
+
+    authentication_classes = (OAuth2Authentication, SessionAuthentication)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    model = TeammateLove
+    serializer_class = TeammateLoveSerializer
+
+
+    def is_user_on_team(self, user):
+        return CourseTeamMembership.objects.filter(user=user, team__team_id=self.kwargs['team_id']).exists()
+
+    def get_queryset(self):
+        user = self.request.user
+        loves = user.received_loves.filter(team__team_id=self.kwargs['team_id'])
+        if self.request.GET.get('all'):
+            return loves.all()
+        else:
+            return loves.filter(created__gte=last_monday())
+
+    def post(self, request, *args, **kwargs):
+        team = get_object_or_404(CourseTeam, team_id=self.kwargs['team_id'])
+        recipient = get_object_or_404(User, username=request.POST['recipient'])
+        love_message = get_object_or_404(TeammateLoveMessage, pk=request.POST['message_id'])
+
+        if not self.is_user_on_team(self.request.user):
+            raise ValidationError("You aren't on this team")
+        if not self.is_user_on_team(recipient):
+            raise ValidationError("Recipient isn't on team")
+
+        qs = self.request.user.sent_loves.filter(
+            team=team,
+            created__gte=last_monday()
+        )
+        if qs.exists():
+            raise ValidationError('You already sent a teammate some love this week!')
+
+        TeammateLove.objects.create(
+            sender=self.request.user,
+            recipient=recipient,
+            team=team,
+            message=love_message,
+        )
+        return Response(status=status.HTTP_201_CREATED)
+
+class TeammateLoveCourseView(ListAPIView):
+    authentication_classes = (OAuth2Authentication, SessionAuthentication)
+    permission_classes = (permissions.IsAuthenticated,)
+    model = TeammateLove
+    serializer_class = TeammateLoveSerializer
+    
+    def get_queryset(self):
+        qs = TeammateLove.objects.filter(team__course_id=self.kwargs['course_id'])
+        if self.request.GET.get('all'):
+            return qs
+        return qs.filter(created__gte=last_monday())
+
+class TeammateLoveCourseCountView(ListAPIView):
+    authentication_classes = (OAuth2Authentication, SessionAuthentication)
+    permission_classes = (permissions.IsAuthenticated,)
+    
+    def get_queryset(self):
+        qs = TeammateLove.objects.filter(team__course_id=self.kwargs['course_id'])
+        if self.request.GET.get('all') == 'true':
+            return qs
+        return qs.filter(created__gte=last_monday())
+
+    def get(self, request, course_id):
+        result = dict()
+        for love in self.get_queryset():
+            if love.recipient.username not in result:
+                result[love.recipient.username] = 0
+            result[love.recipient.username] += 1
+        return Response(result)

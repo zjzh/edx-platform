@@ -26,6 +26,10 @@
             <span><%- membershipText %></span>
         </div>
 
+        <% if (isMember) { %>
+            <div class="teammate-love">
+            </div>
+        <% } %>
         <% if (country) { %>
             <div class="team-country">
                 <span class="sr"><%- gettext("The country that team members primarily identify with.") %></span>

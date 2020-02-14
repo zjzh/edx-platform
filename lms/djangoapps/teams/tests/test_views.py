@@ -6,7 +6,7 @@ Tests for the teams API at the HTTP request level.
 
 import json
 import unittest
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 import ddt
 import pytz
@@ -17,7 +17,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django.utils import translation
 from elasticsearch.exceptions import ConnectionError
-from mock import patch
+from mock import patch, Mock, PropertyMock
 from rest_framework.test import APIClient, APITestCase
 from search.search_engine_base import SearchEngine
 from six.moves import range
@@ -36,7 +36,8 @@ from xmodule.modulestore.tests.factories import CourseFactory
 
 from ..models import CourseTeamMembership
 from ..search_indexes import CourseTeam, CourseTeamIndexer, course_team_post_save_callback
-from .factories import LAST_ACTIVITY_AT, CourseTeamFactory
+from ..views import TeammateLoveView
+from .factories import LAST_ACTIVITY_AT, CourseTeamFactory, TeammateLoveFactory, TeammateLoveMessageFactory
 
 
 class TestDashboard(SharedModuleStoreTestCase):
@@ -1765,3 +1766,237 @@ class TestBulkMembershipManagement(TeamAPITestCase):
                        400, method='post',
                        data={'csv': csv_file}, user='staff'
                        )
+
+@ddt.ddt
+class TeammateLoveViewTests(TeamAPITestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        super(TeammateLoveViewTests, cls).setUpTestData()
+        cls.other_team_in_solar_teamset = CourseTeamFactory.create(
+            name='The Sun 2: Solar Boogaloo',
+            team_id='love-test-team-id',
+            course_id=cls.solar_team.course_id,
+            topic_id=cls.solar_team.topic_id,
+        )
+        for i in [1, 2, 3, 4]:
+            cls.create_and_enroll_student(username='test_love_user_' + str(i))
+        
+        for i in [1, 2, 3]:
+            cls.other_team_in_solar_teamset.add_user(cls.users['test_love_user_' + str(i)])
+
+        cls.base_monday = date(2020, 2, 3)
+        assert cls.base_monday.weekday() == 0
+        cls.love_messages = [
+            TeammateLoveMessageFactory.create(course_id=cls.test_course_1.id) for i in range(3)
+        ]
+
+    def setUp(self):
+        super(TeammateLoveViewTests, self).setUp()
+        self.last_monday_patcher = patch(
+            'lms.djangoapps.teams.views.last_monday',
+            return_value=self.base_monday,
+        )
+        mocked_last_monday = self.last_monday_patcher.start()
+
+    def tearDown(self):
+        super(TeammateLoveViewTests, self).tearDown()
+        self.last_monday_patcher.stop()
+
+    def base_monday_offset(self, offset):
+        return self.base_monday + timedelta(days=offset)
+
+    @ddt.data(0, 1, 2, 3, 4, 5, 6)
+    def test_get_loves_this_week(self, day_offset):
+        TeammateLoveFactory.create(
+            sender=self.users['test_love_user_1'],
+            recipient=self.users['test_love_user_2'],
+            team=self.other_team_in_solar_teamset,
+            message=self.love_messages[0],
+            created=self.base_monday_offset(day_offset)
+        )
+
+        self.client.login(username='test_love_user_2', password=self.test_password)
+        response = self.client.get(
+            reverse('teammate_love', args=['love-test-team-id'])
+        )
+        self.assertEqual(response.status_code, 200)
+        loves = response.json()['results']
+        self.assertEqual(len(loves), 1)
+        self.assertEqual(loves[0]['team'], 'The Sun 2: Solar Boogaloo')
+        self.assertEqual(loves[0]['message'], 'message-0')
+        self.assertEqual(loves[0]['sender'], 'test_love_user_1')
+
+    @ddt.data(-30, -4, -50, -1)
+    def test_get_loves_earlier_than_this_week(self, day_offset):
+        TeammateLoveFactory.create(
+            sender=self.users['test_love_user_1'],
+            recipient=self.users['test_love_user_2'],
+            team=self.other_team_in_solar_teamset,
+            message=self.love_messages[0],
+            created=self.base_monday_offset(day_offset)
+        )
+
+        self.client.login(username='test_love_user_2', password=self.test_password)
+        response = self.client.get(
+            reverse('teammate_love', args=['love-test-team-id'])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['results'], [])
+
+    def test_get_multiple_loves(self):
+        for user, offset in [
+            ('test_love_user_1', 4),
+            ('test_love_user_1', -3),
+            ('test_love_user_2', 2),
+            ('test_love_user_2', -6),
+        ]:
+            TeammateLoveFactory.create(
+                sender=self.users[user],
+                recipient=self.users['test_love_user_3'],
+                team=self.other_team_in_solar_teamset,
+                message=self.love_messages[0],
+                created=self.base_monday_offset(offset)
+            )
+        self.client.login(username='test_love_user_3', password=self.test_password)
+        response = self.client.get(
+            reverse('teammate_love', args=['love-test-team-id'])
+        )
+        self.assertEqual(response.status_code, 200)
+        loves = response.json()['results']
+        self.assertEqual(len(loves), 2)
+        self.assertEqual(loves[0]['team'], 'The Sun 2: Solar Boogaloo')
+        self.assertEqual(loves[0]['message'], 'message-0')
+        self.assertEqual(loves[0]['sender'], 'test_love_user_1')
+        self.assertEqual(loves[1]['team'], 'The Sun 2: Solar Boogaloo')
+        self.assertEqual(loves[1]['message'], 'message-0')
+        self.assertEqual(loves[1]['sender'], 'test_love_user_2')
+
+
+    def _test_post_love(
+        self, 
+        sender_username='test_love_user_1',
+        recipient_username='test_love_user_3',
+        team_id='love-test-team-id',
+        message_id=None,
+        expected_status=201,
+        expected_error=None
+    ):
+        message_id = message_id or self.love_messages[0].id
+        self.client.login(username=sender_username, password=self.test_password)
+        response = self.client.post(
+            reverse('teammate_love', args=[team_id]),
+            data={
+                'recipient': recipient_username,
+                'message_id': message_id,
+            }
+        )
+        self.assertEqual(response.status_code, expected_status)
+
+
+    def test_post_love_success(self):
+        self._test_post_love()
+
+    def test_post_love_team_404(self):
+        self._test_post_love(team_id='nonexistant-team-id', expected_status=404)
+
+    def test_post_love_recipient_404(self):
+        self._test_post_love(recipient_username='nonexistant-recipient-username', expected_status=404)
+
+    def test_post_love_message_404(self):
+        self._test_post_love(message_id=-1, expected_status=404)
+
+    def test_post_love_sender_not_on_team(self):
+        self._test_post_love(sender_username='test_love_user_4', expected_status=400)
+
+    def test_post_love_reciever_not_on_team(self):
+        self._test_post_love(recipient_username='test_love_user_4', expected_status=400)
+
+    def test_post_love_already_sent_this_week(self):
+        self.last_monday_patcher.stop()
+        TeammateLoveFactory.create(
+            sender=self.users['test_love_user_1'],
+            recipient=self.users['test_love_user_2'],
+            team=self.other_team_in_solar_teamset,
+            message=self.love_messages[0],
+        )
+        self._test_post_love(expected_status=400)
+
+    def test_post_love_already_sent_last_week(self):
+        self.last_monday_patcher.stop()
+        TeammateLoveFactory.create(
+            sender=self.users['test_love_user_1'],
+            recipient=self.users['test_love_user_2'],
+            team=self.other_team_in_solar_teamset,
+            message=self.love_messages[0],
+            created=date.today() - timedelta(days=7)
+        )
+        self._test_post_love()
+
+    def test_teammate_love_course(self):
+        before_base_monday = self.base_monday_offset(-2)
+        after_base_monday = self.base_monday_offset(2)
+        #Make every user in our test team create two loves, one before base_monday and one after
+        for sender, receiver in [
+            ('test_love_user_1', 'test_love_user_2'),
+            ('test_love_user_2', 'test_love_user_1'),
+            ('test_love_user_3', 'test_love_user_1')
+        ]:
+            for created in (before_base_monday, after_base_monday):
+                TeammateLoveFactory.create(
+                    sender=self.users[sender],
+                    recipient=self.users[receiver],
+                    team=self.other_team_in_solar_teamset,
+                    message=self.love_messages[0],
+                    created=created
+                )
+        self.nuclear_team.add_user(self.users['test_love_user_1'])
+
+        #Make sure we see loves from other teams in this course. Do one before and one after for hyucks
+        for sender, receiver in [
+            ('test_love_user_1', 'student_enrolled_both_courses_other_team'),
+            ('student_enrolled_both_courses_other_team', 'test_love_user_1'),
+        ]:
+            for created in (before_base_monday, after_base_monday):
+                TeammateLoveFactory.create(
+                    sender=self.users[sender],
+                    recipient=self.users[receiver],
+                    team=self.nuclear_team,
+                    message=self.love_messages[0],
+                    created=created,
+                )
+        
+        # Make sure we don't see loves from other courses (and make some throughout time just because)
+        self.create_and_enroll_student(
+            courses=[self.test_course_2],
+            username='test_love_another_course'
+        )
+        self.another_team.add_user(self.users['test_love_another_course'])
+        for sender, receiver in [
+            ('test_love_another_course', 'student_enrolled_both_courses_other_team'),
+            ('student_enrolled_both_courses_other_team', 'test_love_another_course'),
+        ]:
+            for created in (before_base_monday, after_base_monday):
+                TeammateLoveFactory.create(
+                    sender=self.users[sender],
+                    recipient=self.users[receiver],
+                    team=self.another_team,
+                    message=self.love_messages[0],
+                    created=created,
+                )
+
+        self.client.login(username=self.users['course_staff'].username, password=self.test_password)
+        # Get only the current loves
+        response = self.client.get(
+            reverse('teammate_love_course', args=[self.test_course_1.id])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['count'], 5)
+
+        #Get the full history of loves
+        response = self.client.get(
+            reverse('teammate_love_course', args=[self.test_course_1.id]),
+            {'all': True}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['count'], 10)

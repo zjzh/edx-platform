@@ -1,0 +1,15 @@
+<div id="teammate-love-chart">
+    <h3><%= table_title %> Teammate Love Recipient Totals</h3>
+    <table class="teamate-love-count">
+    <tr>
+        <th>Username</th>
+        <th>Total Loves</th>
+    </tr>
+        <% _(_(loves_count).keys()).each(function(username) { %>
+            <tr>
+                <td><%= username %></td>
+                <td><%= loves_count[username] %></td>
+            </tr>
+        <% }) %>
+    </table>
+</div>

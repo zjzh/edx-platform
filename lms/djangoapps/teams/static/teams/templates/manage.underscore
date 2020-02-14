@@ -38,5 +38,28 @@
             </div>
             <!-- We need to describe the format of the CSV here (TODO MST-49) -->
         </div>
+        <div class="team-management-section">
+            <h3 class="team-detail-header">
+                <%- gettext("View Teammate Love Data") %>
+            </h3>
+            <p>
+                <%- gettext(
+                    "Click to view Teammate Love data for this course (For this week, or all time)"
+                ) %>
+            </p>
+            <button
+                id="teammate-love-count-week"
+                class="download-team-csv action action-primary"
+            >
+                <%- gettext("Current Week") %>
+            </button>
+            <button
+                id="teammate-love-count-all"
+                class="download-team-csv action action-primary"
+            >
+                <%- gettext("All-Time") %>
+            </button>
+            <div id="teammate-love-chart-container"></div>
+        </div>
     </div>
 </div>

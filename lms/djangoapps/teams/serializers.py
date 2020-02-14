@@ -12,7 +12,7 @@ from django_countries import countries
 from rest_framework import serializers
 
 from lms.djangoapps.teams.api import add_team_count, get_team_count_query_set
-from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership
+from lms.djangoapps.teams.models import CourseTeam, CourseTeamMembership, TeammateLove, TeammateLoveMessage
 from openedx.core.djangoapps.user_api.accounts.serializers import UserReadOnlySerializer
 from openedx.core.lib.api.fields import ExpandableField
 from openedx.core.lib.api.serializers import CollapsedReferenceSerializer
@@ -219,3 +219,21 @@ class BulkTeamCountTopicSerializer(BaseTopicSerializer):  # pylint: disable=abst
     """
     class Meta(object):
         list_serializer_class = BulkTeamCountTopicListSerializer
+
+
+class TeammateLoveSerializer(serializers.ModelSerializer):
+
+    sender = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    recipient = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    message = serializers.SlugRelatedField(slug_field='text', read_only=True)
+    team = serializers.SlugRelatedField(slug_field='name', read_only=True)
+
+    class Meta:
+        model = TeammateLove
+        fields = ['sender', 'recipient', 'message', 'team', 'created']
+
+class TeammateLoveMessageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TeammateLoveMessage
+        fields = ['id', 'text']

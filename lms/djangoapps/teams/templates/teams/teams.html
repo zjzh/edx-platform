@@ -55,7 +55,11 @@ from openedx.core.djangolib.js_utils import (
         maxTeamSize: ${course.teams_configuration.default_max_team_size | n, dump_js_escaped_json},
         languages: ${languages | n, dump_js_escaped_json},
         countries: ${countries | n, dump_js_escaped_json},
-        teamsBaseUrl: '${teams_base_url | n, js_escaped_string}'
+        teamsBaseUrl: '${teams_base_url | n, js_escaped_string}',
+        teammateLoveUrl: '${teammate_love_url | n, js_escaped_string}',
+        teammateLoveCourseUrl: '${teammate_love_course_url | n, js_escaped_string}',
+        teammateLoveMessages: ${teammate_love_messages | n, dump_js_escaped_json},
+        teammateLoveCourseCountUrl: '${teammate_love_course_count_url | n, js_escaped_string}'
     });
 </%static:require_module>
 </%block>

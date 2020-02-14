@@ -7,8 +7,9 @@
         'edx-ui-toolkit/js/utils/html-utils',
         'common/js/components/utils/view_utils',
         'teams/js/views/team_utils',
-        'text!teams/templates/manage.underscore'
-    ], function(Backbone, _, gettext, HtmlUtils, ViewUtils, TeamUtils, manageTemplate) {
+        'text!teams/templates/manage.underscore',
+        'text!teams/templates/love-chart.underscore'
+    ], function(Backbone, _, gettext, HtmlUtils, ViewUtils, TeamUtils, manageTemplate, teammateLoveTableTemplate) {
         var ManageView = Backbone.View.extend({
 
             srInfo: {
@@ -18,13 +19,17 @@
 
             events: {
                 'click #download-team-csv-input': ViewUtils.withDisabledElement('downloadCsv'),
-                'change #upload-team-csv-input': ViewUtils.withDisabledElement('uploadCsv')
+                'change #upload-team-csv-input': ViewUtils.withDisabledElement('uploadCsv'),
+                'click #teammate-love-count-all': 'handleCountLoveAllClick',
+                'click #teammate-love-count-week': 'handleCountLoveWeekClick'
             },
 
             initialize: function(options) {
+                console.log(options);
                 this.teamEvents = options.teamEvents;
                 this.csvUploadUrl = options.teamMembershipManagementUrl;
                 this.csvDownloadUrl = options.teamMembershipManagementUrl;
+                this.teammateLoveCourseCountUrl = options.teammateLoveCourseCountUrl;
             },
 
             render: function() {
@@ -56,6 +61,37 @@
                 ).fail(
                     self.handleCsvUploadFailure
                 );
+            },
+
+            handleCountLoveClick: function(all) {
+                var view = this;
+                console.log("in the func");
+                $.ajax({
+                    type: 'GET',
+                    url: this.teammateLoveCourseCountUrl,
+                    data: {
+                        all: all
+                    }
+                }).done(function(data) {
+                    console.log("good");
+                    HtmlUtils.setHtml(
+                        view.$('#teammate-love-chart-container'),
+                        HtmlUtils.template(teammateLoveTableTemplate)({
+                            loves_count: data,
+                            table_title: all ? 'All-Time' : 'Weekly'
+                        })
+                    );
+                }).fail(function(data) {
+                    console.log('error', data);
+                });
+            },
+
+            handleCountLoveAllClick: function() {
+                this.handleCountLoveClick(true);
+            },
+
+            handleCountLoveWeekClick: function() {
+                this.handleCountLoveClick(false);
             },
 
             handleCsvUploadSuccess: function() {
