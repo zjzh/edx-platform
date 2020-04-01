@@ -1226,7 +1226,7 @@ def create_xblock_info(xblock, data=None, metadata=None, include_ancestor_info=F
             })
 
         # update xblock_info with special exam information if the feature flag is enabled
-        if settings.FEATURES.get('ENABLE_SPECIAL_EXAMS'):
+        if settings.FEATURES.get('ENABLE_SPECIAL_EXAMS') and course.enable_proctored_exams:
             if xblock.category == 'course':
                 xblock_info.update({
                     'enable_proctored_exams': xblock.enable_proctored_exams,
