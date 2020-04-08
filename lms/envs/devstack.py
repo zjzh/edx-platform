@@ -254,13 +254,13 @@ BLOCKSTORE_API_URL = "http://edx.devstack.blockstore:18250/api/v1/"
 ###################### Cross-domain requests ######################
 FEATURES['ENABLE_CORS_HEADERS'] = True
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = ()
+CORS_ORIGIN_WHITELIST = ('localhost:19000',)
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_HEADERS = corsheaders_default_headers + (
     'use-jwt-cookie',
 )
 
-LOGIN_REDIRECT_WHITELIST = [CMS_BASE]
+LOGIN_REDIRECT_WHITELIST = [CMS_BASE, 'localhost:19000']
 
 ###################### JWTs ######################
 # pylint: disable=unicode-format-string
