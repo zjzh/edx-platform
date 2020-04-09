@@ -310,8 +310,11 @@ EDXNOTES_INTERNAL_API = 'http://edx.devstack.edxnotesapi:18120/api/v1'
 EDXNOTES_CLIENT_NAME = 'edx_notes_api-backend-service'
 
 ############## Settings for Microfrontends  #########################
-LEARNING_MICROFRONTEND_URL = 'http://localhost:2000'
-ACCOUNT_MICROFRONTEND_URL = 'http://localhost:1997'
+LEARNING_MICROFRONTEND_URL = 'http://localhost:19000/learning'
+ACCOUNT_MICROFRONTEND_URL = 'http://localhost:19000/account'
+WRITABLE_GRADEBOOK_URL = 'http://localhost:19000/gradebook'
+PROGRAM_CONSOLE_MICROFRONTEND_URL = 'http://localhost:19000/program-console'
+PROFILE_MICROFRONTEND_URL = 'http://localhost:19000/profile/u/'
 
 ############## Docker based devstack settings #######################
 
