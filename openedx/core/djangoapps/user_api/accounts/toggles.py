@@ -42,6 +42,7 @@ REDIRECT_TO_ACCOUNT_MICROFRONTEND = WaffleFlag('account', 'redirect_to_microfron
 
 
 def should_redirect_to_account_microfrontend():
+    return True
     return (
         configuration_helpers.get_value('ENABLE_ACCOUNT_MICROFRONTEND') and
         REDIRECT_TO_ACCOUNT_MICROFRONTEND.is_enabled()

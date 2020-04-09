@@ -40,6 +40,7 @@ COURSEWARE_MICROFRONTEND_COURSE_TEAM_PREVIEW = CourseWaffleFlag(WAFFLE_FLAG_NAME
 
 
 def should_redirect_to_courseware_microfrontend(course_key):
+    return True
     return (
         settings.FEATURES.get('ENABLE_COURSEWARE_MICROFRONTEND') and
         (not course_key.deprecated) and  # Old Mongo courses not supported

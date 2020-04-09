@@ -200,8 +200,8 @@ class CoursewareIndex(View):
                 return
 
             # and staff will not redirect, either
-            if self.is_staff:
-                return
+            # if self.is_staff:
+            #    return
 
             url = get_microfrontend_url(
                 self.course_key,

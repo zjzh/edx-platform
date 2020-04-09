@@ -26,6 +26,7 @@ REDIRECT_TO_PROFILE_MICROFRONTEND = WaffleFlag(WAFFLE_FLAG_NAMESPACE, 'redirect_
 
 
 def should_redirect_to_profile_microfrontend():
+    return True
     return (
         configuration_helpers.get_value('ENABLE_PROFILE_MICROFRONTEND') and
         REDIRECT_TO_PROFILE_MICROFRONTEND.is_enabled()
