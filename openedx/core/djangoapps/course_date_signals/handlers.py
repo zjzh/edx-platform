@@ -48,6 +48,7 @@ def extract_dates_from_course(course):
         metadata.pop('due', None)
         date_items = [(course.location, metadata)]
 
+        log.info('MIKE: config %s', str(SelfPacedRelativeDatesConfig.current(course_key=course.id).enabled))
         if SelfPacedRelativeDatesConfig.current(course_key=course.id).enabled:
             # Apply the same relative due date to all content inside a section,
             # unless that item already has a relative date set
@@ -84,9 +85,11 @@ def extract_dates(sender, course_key, **kwargs):  # pylint: disable=unused-argum
         log.info("No course found for key %s to extract dates from", course_key)
         return
 
+    log.info("MIKE published, extracting")
     date_items = extract_dates_from_course(course)
 
     try:
+        log.info('MIKE: setting %s', date_items)
         set_dates_for_course(course_key, date_items)
     except Exception:  # pylint: disable=broad-except
         log.exception('Unable to set dates for %s on course publish', course_key)
