@@ -20,9 +20,11 @@ def forwards(apps, schema_editor):
         for mode in ['honor', 'verified', 'professional']:
             conf = objects.create(mode=mode)
             file_name = '{0}{1}'.format(mode, '.png')
+            import pdb;
+            pdb.set_trace()
             conf.icon.save(
                 'badges/{}'.format(file_name),
-                File(open(settings.PROJECT_ROOT / 'static' / 'images' / 'default-badges' / file_name))
+                File(open(settings.PROJECT_ROOT / 'static' / 'images' / 'default-badges' / file_name, 'rb'))
             )
 
             conf.save()
