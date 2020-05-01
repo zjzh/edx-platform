@@ -265,9 +265,9 @@ def reset_deadlines_banner_should_display(course_key, request):
     is_course_staff = bool(
         request.user and course_overview and has_access(request.user, 'staff', course_overview, course_overview.id)
     )
-    if is_self_paced and (not is_course_staff) and (not course_end_date or timezone.now() < course_end_date):
+    if is_self_paced and (is_course_staff) and (not course_end_date or timezone.now() < course_end_date):
         if (CourseEnrollment.objects.filter(
-            course=course_overview, user=request.user, mode=CourseMode.VERIFIED
+            course=course_overview, user=request.user, mode=CourseMode.AUDIT
         ).exists()):
             course_block_tree = get_course_outline_block_tree(
                 request, str(course_key), request.user

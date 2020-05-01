@@ -63,6 +63,7 @@ def send_calendar_sync_email(self, msg_string, from_address=None):
                 exc_info=True
             )
     except Exception:
+        print('((((((((((((')
         log.exception(
             'Unable to send calendar sync email to user from "%s" to "%s"',
             from_address,

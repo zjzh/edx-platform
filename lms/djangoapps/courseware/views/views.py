@@ -741,7 +741,7 @@ class CourseTabView(EdxFragmentView):
             course_overview = CourseOverview.get_from_id(course.id)
             end_date = getattr(course_overview, 'end_date', None)
             if (not end_date or timezone.now() < end_date and CourseEnrollment.objects.filter(
-                course=course_overview, user=request.user, mode=CourseMode.VERIFIED
+                course=course_overview, user=request.user, mode=CourseMode.AUDIT
             ).exists()):
                 display_reset_dates_banner = True
 

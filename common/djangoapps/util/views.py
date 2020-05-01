@@ -21,6 +21,8 @@ from six.moves import map
 from lms.djangoapps.courseware.access import has_access
 from lms.djangoapps.courseware.masquerade import setup_masquerade
 from openedx.core.djangoapps.schedules.utils import reset_self_paced_schedule
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+from openedx.features.calendar_sync.views.management import compose_and_send_calendar_sync_email
 
 import track.views
 from edxmako.shortcuts import render_to_response
@@ -219,6 +221,8 @@ def reset_course_deadlines(request):
     else:
         user = request.user
     reset_self_paced_schedule(user, course_key)
+    course_overview = CourseOverview.get_from_id(course_key)
+    compose_and_send_calendar_sync_email(user, course_overview, is_update=True)
     if redirect_url == RENDER_XBLOCK_NAME:
         detail_id_dict.pop('course_id')
     return redirect(reverse(redirect_url, kwargs=detail_id_dict))

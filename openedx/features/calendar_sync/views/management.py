@@ -23,7 +23,7 @@ def compose_calendar_sync_email(user, course: CourseOverview, is_update=False):
     if is_update:
         calendar_sync_subject = _('Updates for Your {course} Schedule').format(course=course_name)
         calendar_sync_headline = _('Update Your Calendar')
-        calendar_sync_body = _('Your assignment due dates for {course} were recently adjusted. Update your calendar'
+        calendar_sync_body = _('Your assignment due dates for {course} were recently adjusted. Update your calendar '
                                'with your new schedule to ensure that you stay on track!').format(course=course_name)
     else:
         calendar_sync_subject = _('Stay on Track')
@@ -35,6 +35,7 @@ def compose_calendar_sync_email(user, course: CourseOverview, is_update=False):
         'calendar_sync_subject': calendar_sync_subject,
         'calendar_sync_headline': calendar_sync_headline,
         'calendar_sync_body': calendar_sync_body,
+        'platform_name': 'edx',
     }
 
     msg = CalendarSync().personalize(
@@ -60,5 +61,4 @@ def compose_and_send_calendar_sync_email(user, course: CourseOverview, is_update
         return
 
     msg = compose_calendar_sync_email(user, course, is_update)
-
     send_calendar_sync_email.delay(str(msg))
