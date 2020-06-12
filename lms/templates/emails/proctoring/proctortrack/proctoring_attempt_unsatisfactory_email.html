@@ -1,0 +1,14 @@
+{% extends "emails/proctoring_attempt_unsatisfactory_email.html" %}
+{% load i18n %}
+
+<p>
+    {% block contact_information %}
+    {% blocktrans %}
+    To appeal your proctored exam results, please reach out to your course team with any relevant information
+    about your exam at 
+    <a href="{{contact_url}}">
+        {{ contact_url }}
+    </a>.
+    {% endblocktrans %}
+    {% endblock %}
+</p>
