@@ -25,22 +25,22 @@ class BaseDiscussionMixin(object):
     """
     A mixin containing methods common to discussion tests.
     """
-    def setup_thread(self, num_responses, **thread_kwargs):
-        """
-        Create a test thread with the given number of responses, passing all
-        keyword arguments through to the Thread fixture, then invoke
-        setup_thread_page.
-        """
-        thread_id = "test_thread_{}".format(uuid4().hex)
-        thread_fixture = SingleThreadViewFixture(
-            Thread(id=thread_id, commentable_id=self.discussion_id, **thread_kwargs)
-        )
-        for i in range(num_responses):
-            thread_fixture.addResponse(Response(id=str(i), body=str(i)))
-        response = thread_fixture.push()
-        self.assertTrue(response.ok, "Failed to push discussion content")
-        self.setup_thread_page(thread_id)
-        return thread_id
+    # def setup_thread(self, num_responses, **thread_kwargs):
+    #     """
+    #     Create a test thread with the given number of responses, passing all
+    #     keyword arguments through to the Thread fixture, then invoke
+    #     setup_thread_page.
+    #     """
+    #     thread_id = "test_thread_{}".format(uuid4().hex)
+    #     thread_fixture = SingleThreadViewFixture(
+    #         Thread(id=thread_id, commentable_id=self.discussion_id, **thread_kwargs)
+    #     )
+    #     for i in range(num_responses):
+    #         thread_fixture.addResponse(Response(id=str(i), body=str(i)))
+    #     response = thread_fixture.push()
+    #     self.assertTrue(response.ok, "Failed to push discussion content")
+    #     self.setup_thread_page(thread_id)
+    #     return thread_id
 
     def setup_multiple_threads(self, thread_count, **thread_kwargs):
         """
@@ -79,31 +79,31 @@ class CohortTestMixin(object):
             },
         })
 
-    def enable_cohorting(self, course_fixture):
-        """
-        Enables cohorting for the specified course fixture.
-        """
-        url = LMS_BASE_URL + "/courses/" + course_fixture._course_key + '/cohorts/settings'
-        data = json.dumps({'is_cohorted': True})
-        response = course_fixture.session.patch(url, data=data, headers=course_fixture.headers)
-        self.assertTrue(response.ok, "Failed to enable cohorts")
-
-    def enable_always_divide_inline_discussions(self, course_fixture):
-        """
-        Enables "always_divide_inline_discussions" (but does not enabling cohorting).
-        """
-        discussions_url = LMS_BASE_URL + "/courses/" + course_fixture._course_key + '/discussions/settings'
-        discussions_data = json.dumps({'always_divide_inline_discussions': True})
-        course_fixture.session.patch(discussions_url, data=discussions_data, headers=course_fixture.headers)
-
-    def disable_cohorting(self, course_fixture):
-        """
-        Disables cohorting for the specified course fixture.
-        """
-        url = LMS_BASE_URL + "/courses/" + course_fixture._course_key + '/cohorts/settings'
-        data = json.dumps({'is_cohorted': False})
-        response = course_fixture.session.patch(url, data=data, headers=course_fixture.headers)
-        self.assertTrue(response.ok, "Failed to disable cohorts")
+    # def enable_cohorting(self, course_fixture):
+    #     """
+    #     Enables cohorting for the specified course fixture.
+    #     """
+    #     url = LMS_BASE_URL + "/courses/" + course_fixture._course_key + '/cohorts/settings'
+    #     data = json.dumps({'is_cohorted': True})
+    #     response = course_fixture.session.patch(url, data=data, headers=course_fixture.headers)
+    #     self.assertTrue(response.ok, "Failed to enable cohorts")
+    #
+    # def enable_always_divide_inline_discussions(self, course_fixture):
+    #     """
+    #     Enables "always_divide_inline_discussions" (but does not enabling cohorting).
+    #     """
+    #     discussions_url = LMS_BASE_URL + "/courses/" + course_fixture._course_key + '/discussions/settings'
+    #     discussions_data = json.dumps({'always_divide_inline_discussions': True})
+    #     course_fixture.session.patch(discussions_url, data=discussions_data, headers=course_fixture.headers)
+    #
+    # def disable_cohorting(self, course_fixture):
+    #     """
+    #     Disables cohorting for the specified course fixture.
+    #     """
+    #     url = LMS_BASE_URL + "/courses/" + course_fixture._course_key + '/cohorts/settings'
+    #     data = json.dumps({'is_cohorted': False})
+    #     response = course_fixture.session.patch(url, data=data, headers=course_fixture.headers)
+    #     self.assertTrue(response.ok, "Failed to disable cohorts")
 
     def add_manual_cohort(self, course_fixture, cohort_name):
         """
