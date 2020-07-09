@@ -11,7 +11,6 @@ import ddt
 import pytest
 import six
 from bok_choy.promise import BrokenPromise
-from six.moves import range
 
 from capa.tests.response_xml_factory import (
     AnnotationResponseXMLFactory,
@@ -702,15 +701,8 @@ class CheckboxProblemTypeTestNonRandomized(CheckboxProblemTypeBase, NonRandomize
             data=self.factory.build_xml(**self.factory_kwargs),
             metadata={'rerandomize': 'never', 'show_reset_button': True}
         )
-#
-#
-# class CheckboxProblemTypeNeverShowCorrectnessTest(CheckboxProblemTypeBase, ProblemNeverShowCorrectnessMixin):
-#     """
-#     Ensure that correctness can be withheld for Checkbox Problem Type problems.
-#     """
-#     pass
-#
-#
+
+
 @ddt.ddt
 class MultipleChoiceProblemTypeBase(ProblemTypeTestBase):
     """
@@ -796,55 +788,6 @@ class MultipleChoiceProblemTypeTest(MultipleChoiceProblemTypeBase, ProblemTypeTe
 
         # Finally, make sure that clicking Show Answer moved focus to the correct place.
         self.problem_page.wait_for_show_answer_notification()
-#
-#
-# @ddt.ddt
-# class MultipleChoiceProblemResetCorrectnessAfterChangingAnswerTest(MultipleChoiceProblemTypeBase):
-#     """
-#     Tests for Multiple choice problem with changing answers
-#     """
-#     shard = 18
-#
-#     @ddt.data(['correct', '1/1 point (ungraded)'], ['incorrect', '0/1 point (ungraded)'])
-#     @ddt.unpack
-#     def test_mcq_score_after_answer_and_reset(self, correctness, score):
-#         """
-#         Scenario: I can see my score on a multiple choice problem when I answer it and after I reset it
-#
-#         Given I am viewing a multiple choice problem
-#         When I answer a multiple choice problem <correctness>
-#         Then I should see a <score>
-#         When I reset the problem
-#         Then I should see a score of points possible: 0/1 point (ungraded)
-#         """
-#         self.answer_problem(correctness)
-#         self.problem_page.click_submit()
-#         self.assertEqual(self.problem_page.problem_progress_graded_value, score)
-#         self.problem_page.click_reset()
-#         self.assertEqual(self.problem_page.problem_progress_graded_value, '0/1 point (ungraded)')
-#
-#     @ddt.data(['correct', 'incorrect'], ['incorrect', 'correct'])
-#     @ddt.unpack
-#     def test_reset_correctness_after_changing_answer(self, initial_correctness, other_correctness):
-#         """
-#         Scenario: I can reset the correctness of a multiple choice problem after changing my answer
-#
-#         Given I am viewing a multiple choice problem
-#         When I answer a multiple choice problem <initial_correctness>
-#         Then my multiple choice answer is marked <initial_correctness>
-#         And I reset the problem
-#         Then my multiple choice answer is NOT marked <initial_correctness>
-#         And my multiple choice answer is NOT marked <other_correctness>
-#         """
-#         self.assertTrue(self.problem_status("unanswered"))
-#         self.answer_problem(initial_correctness)
-#         self.problem_page.click_submit()
-#
-#         self.assertTrue(self.problem_status(initial_correctness))
-#         self.problem_page.click_reset()
-#
-#         self.assertFalse(self.problem_status(initial_correctness))
-#         self.assertFalse(self.problem_status(other_correctness))
 
 
 @ddt.ddt
@@ -884,112 +827,6 @@ class MultipleChoiceProblemTypeTestNonRandomized(MultipleChoiceProblemTypeBase, 
         self.answer_problem("correct")
         self.problem_page.click_submit()
         self.assertFalse(self.problem_page.is_reset_button_present())
-#
-#
-# class MultipleChoiceProblemTypeTestOneAttempt(MultipleChoiceProblemTypeBase):
-#     """
-#     Test Multiple choice problem with single attempt
-#     """
-#
-#     def get_problem(self):
-#         """
-#         Creates a {problem_type} problem
-#         """
-#         # Generate the problem XML using capa.tests.response_xml_factory
-#         return XBlockFixtureDesc(
-#             'problem',
-#             self.problem_name,
-#             data=self.factory.build_xml(**self.factory_kwargs),
-#             metadata={'rerandomize': 'never', 'show_reset_button': True, 'max_attempts': 1}
-#         )
-#
-#     def test_answer_with_one_attempt_correctly(self):
-#         """
-#         Scenario: I can answer a problem with one attempt correctly and can not reset
-#
-#         Given I am viewing a "multiple choice" problem with "1" attempt
-#         When I answer a "multiple choice" problem "correctly"
-#         Then The "Reset" button does not appear
-#         """
-#         self.answer_problem("correct")
-#         self.problem_page.click_submit()
-#         self.assertFalse(self.problem_page.is_reset_button_present())
-#
-#
-# class MultipleChoiceProblemTypeTestMultipleAttempt(MultipleChoiceProblemTypeBase):
-#     """
-#     Test Multiple choice problem with multiple attempts
-#     """
-#
-#     def get_problem(self):
-#         """
-#         Creates a {problem_type} problem
-#         """
-#         # Generate the problem XML using capa.tests.response_xml_factory
-#         return XBlockFixtureDesc(
-#             'problem',
-#             self.problem_name,
-#             data=self.factory.build_xml(**self.factory_kwargs),
-#             metadata={'rerandomize': 'always', 'show_reset_button': True, 'max_attempts': 3}
-#         )
-#
-#     def test_answer_with_multiple_attempt_correctly(self):
-#         """
-#         Scenario: I can answer a problem with multiple attempts correctly and still reset the problem
-#
-#         Given I am viewing a "multiple choice" problem with "3" attempts
-#         Then I should see "You have used 0 of 3 attempts" somewhere in the page
-#         When I answer a "multiple choice" problem "correctly"
-#         Then The "Reset" button does appear
-#         """
-#         self.assertEqual(
-#             self.problem_page.submission_feedback,
-#             "You have used 0 of 3 attempts",
-#             "All 3 attempts are not available"
-#         )
-#         self.answer_problem("correct")
-#         self.problem_page.click_submit()
-#         self.assertTrue(self.problem_page.is_reset_button_present())
-#
-#     def test_learner_can_see_attempts_left(self):
-#         """
-#         Scenario: I can view how many attempts I have left on a problem
-#
-#         Given I am viewing a "multiple choice" problem with "3" attempts
-#         Then I should see "You have used 0 of 3 attempts" somewhere in the page
-#         When I answer a "multiple choice" problem "incorrectly"
-#         And I reset the problem
-#         Then I should see "You have used 1 of 3 attempts" somewhere in the page
-#         When I answer a "multiple choice" problem "incorrectly"
-#         And I reset the problem
-#         Then I should see "You have used 2 of 3 attempts" somewhere in the page
-#         And The "Submit" button does appear
-#         When I answer a "multiple choice" problem "correctly"
-#         Then The "Reset" button does not appear
-#         """
-#         for attempts_used in range(3):
-#             self.assertEqual(
-#                 self.problem_page.submission_feedback,
-#                 u"You have used {} of 3 attempts".format(str(attempts_used)),
-#                 "All 3 attempts are not available"
-#             )
-#             if attempts_used == 2:
-#                 self.assertTrue(self.problem_page.is_submit_disabled())
-#                 self.answer_problem("correct")
-#                 self.problem_page.click_submit()
-#                 self.assertFalse(self.problem_page.is_reset_button_present())
-#             else:
-#                 self.answer_problem("incorrect")
-#                 self.problem_page.click_submit()
-#                 self.problem_page.click_reset()
-#
-#
-# class MultipleChoiceProblemTypeNeverShowCorrectnessTest(MultipleChoiceProblemTypeBase,
-#                                                         ProblemNeverShowCorrectnessMixin):
-#     """
-#     Ensure that correctness can be withheld for Multiple Choice Problem Type problems.
-#     """
-#     pass
 
 
 class RadioProblemTypeBase(ProblemTypeTestBase):
@@ -1797,55 +1634,6 @@ class RadioTextProblemTypeTest(RadioTextProblemTypeBase, ProblemTypeTestMixin):
     """
     shard = 8
     pass
-
-
-# @ddt.ddt
-# class RadioTextProblemResetCorrectnessAfterChangingAnswerTest(RadioTextProblemTypeBase):
-#     """
-#     Tests for Radio Text problem with changing answers
-#     """
-#     shard = 18
-#
-#     @ddt.data(['correct', '1/1 point (ungraded)'], ['incorrect', '0/1 point (ungraded)'])
-#     @ddt.unpack
-#     def test_mcq_score_after_answer_and_reset(self, correctness, score):
-#         """
-#         Scenario: I can see my score on a radio text problem when I answer it and after I reset it
-#
-#         Given I am viewing a radio text problem
-#         When I answer a radio text problem correct/incorrect
-#         Then I should see a score
-#         When I reset the problem
-#         Then I should see a score of points possible: (1/1 point (ungraded) -- 0/1 point (ungraded)
-#         """
-#         self.answer_problem(correctness)
-#         self.problem_page.click_submit()
-#         self.assertEqual(self.problem_page.problem_progress_graded_value, score)
-#         self.problem_page.click_reset()
-#         self.assertEqual(self.problem_page.problem_progress_graded_value, '0/1 point (ungraded)')
-#
-#     @ddt.data(['correct', 'incorrect'], ['incorrect', 'correct'])
-#     @ddt.unpack
-#     def test_reset_correctness_after_changing_answer(self, initial_correctness, other_correctness):
-#         """
-#         Scenario: I can reset the correctness of a multiple choice problem after changing my answer
-#
-#         Given I am viewing a radio text problem
-#         When I answer a radio text problem InitialCorrectness
-#         Then my radio text answer is marked InitialCorrectness
-#         And I reset the problem
-#         Then my answer is NOT marked InitialCorrectness
-#         And my answer is NOT marked OtherCorrectness
-#         """
-#         self.assertTrue(self.problem_status("unanswered"))
-#         self.answer_problem(initial_correctness)
-#         self.problem_page.click_submit()
-#
-#         self.assertTrue(self.problem_status(initial_correctness))
-#         self.problem_page.click_reset()
-#
-#         self.assertFalse(self.problem_status(initial_correctness))
-#         self.assertFalse(self.problem_status(other_correctness))
 
 
 class RadioTextProblemTypeTestNonRandomized(RadioTextProblemTypeBase, NonRandomizedProblemTypeTestMixin):
