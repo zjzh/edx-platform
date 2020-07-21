@@ -1,0 +1,297 @@
+INSTALLED_APPS:
+    # Standard ones that are always installed...
+    - 'django.contrib.auth'
+    - 'django.contrib.contenttypes'
+    - 'django.contrib.humanize',
+    - 'django.contrib.messages'
+    - 'django.contrib.redirects'
+    - 'django.contrib.sessions'
+    - 'django.contrib.sites'
+    - 'django.contrib.staticfiles'
+    - 'djcelery'
+
+    # Common Initialization
+    - 'openedx.core.djangoapps.common_initialization.apps.CommonInitializationConfig'
+
+    # LMS-specific Initialization
+    - 'lms_initialization.apps.LMSInitializationConfig'
+
+    # Common views
+    - 'openedx.core.djangoapps.common_views'
+
+    # History tables
+    - 'simple_history'
+
+    # Database-backed configuratio
+    - 'config_models'
+    - 'openedx.core.djangoapps.config_model_utils'
+    - 'waffle'
+
+    # Monitor the status of services
+    - 'openedx.core.djangoapps.service_status'
+
+    # Display status message to students
+    - 'status'
+
+    # For asset pipelining
+    - 'edxmako.apps.EdxMakoConfig'
+    - 'pipeline'
+    - 'static_replace'
+    - 'webpack_loader'
+
+    # For user interface plugins
+    - 'web_fragments'
+    - 'openedx.core.djangoapps.plugin_api'
+
+    # For content serving
+    - 'openedx.core.djangoapps.contentserver'
+
+    # Site configuration for theming and behavioral modification
+    - 'openedx.core.djangoapps.site_configuration'
+
+    # Video module configs (This will be moved to Video once it becomes an XBlock)
+    # - 'openedx.core.djangoapps.video_config'
+
+    # edX Video Pipeline integration
+    # - 'openedx.core.djangoapps.video_pipeline'
+
+    # Our courseware
+    # - 'lms.djangoapps.courseware'
+    # - 'coursewarehistoryextended'
+    # - 'student.apps.StudentConfig'
+
+    # - 'static_template_view'
+    # - 'staticbook'
+    # - 'track'
+    # - 'eventtracking.django.apps.EventTrackingConfig'
+    # - 'util'
+    # - 'lms.djangoapps.certificates.apps.CertificatesConfig'
+    # - 'dashboard'
+    # - 'lms.djangoapps.instructor_task'
+    # - 'openedx.core.djangoapps.course_groups'
+    # - 'bulk_email'
+    # - 'branding'
+
+    # New (Blockstore-based) XBlock runtime
+    # - 'openedx.core.djangoapps.xblock.apps.LmsXBlockAppConfig'
+
+    # Student support tools
+    # - 'support'
+
+    # django-oauth-toolkit
+    - 'oauth2_provider'
+    - 'openedx.core.djangoapps.oauth_dispatch.apps.OAuthDispatchAppConfig'
+
+    - 'third_party_auth'
+
+    # System Wide Roles
+    - 'openedx.core.djangoapps.system_wide_roles'
+
+    - 'openedx.core.djangoapps.auth_exchange'
+
+    # For the wiki
+    # - 'wiki'  # The new django-wiki from benjaoming
+    # - 'django_notify'
+    # - 'course_wiki'  # Our customizations
+    # - 'mptt'
+    # - 'sekizai'
+    # - 'wiki.plugins.links'
+    # Notifications were enabled, but only 11 people used it in three years. It
+    # got tangled up during the Django 1.8 migration, so we are disabling it.
+    # See TNL-3783 for details.
+    #'wiki.plugins.notifications',
+    # - 'course_wiki.plugins.markdownedx'
+
+    # For testing
+    - 'django.contrib.admin'  # only used in DEBUG mode
+    - 'debug'
+    - 'openedx.core.djangoapps.util.apps.UtilConfig'
+
+    # Discussion forums
+    # - 'openedx.core.djangoapps.django_comment_common'
+
+    # Notes
+    # - 'edxnotes'
+
+    # Splash screen
+    # - 'splash'
+
+    # User API
+    - 'rest_framework'
+
+    - 'openedx.core.djangoapps.user_api'
+
+    # Shopping cart
+    # - 'shoppingcart'
+
+    # Different Course Modes
+    # - 'course_modes.apps.CourseModesConfig'
+
+    # Enrollment API
+    # - 'openedx.core.djangoapps.enrollments'
+
+    # Entitlement API
+    # - 'entitlements.apps.EntitlementsConfig'
+
+    # Bulk Enrollment API
+    # - 'bulk_enroll'
+
+    # Student Identity Verification
+    # - 'lms.djangoapps.verify_student.apps.VerifyStudentConfig'
+
+    # Dark-launching languages
+    # - 'openedx.core.djangoapps.dark_lang'
+
+    # RSS Proxy
+    # - 'rss_proxy'
+
+    # Country embargo support
+    # - 'openedx.core.djangoapps.embargo'
+
+    # Course action state
+    # - 'course_action_state'
+
+    # Additional problem types
+    # - 'edx_jsme'    # Molecular Structure
+
+    # Country list
+    # - 'django_countries'
+
+    # edX Mobile API
+    # - 'mobile_api'
+    # - 'social_django'
+
+    # Surveys
+    # - 'survey.apps.SurveyConfig'
+
+    # - 'lms.djangoapps.lms_xblock.apps.LMSXBlockConfig'
+
+    # Course data caching
+    # - 'openedx.core.djangoapps.content.course_overviews.apps.CourseOverviewsConfig'
+    # - 'openedx.core.djangoapps.content.block_structure.apps.BlockStructureConfig'
+    # - 'lms.djangoapps.course_blocks'
+
+
+    # Coursegraph
+    # - 'openedx.core.djangoapps.coursegraph.apps.CoursegraphConfig'
+
+    # Mailchimp Syncing
+    # - 'mailing'
+
+    # CORS and cross-domain CSRF
+    - 'corsheaders'
+    - 'openedx.core.djangoapps.cors_csrf'
+
+    # - 'lms.djangoapps.commerce.apps.CommerceConfig'
+
+    # Credit courses
+    # - 'openedx.core.djangoapps.credit.apps.CreditConfig'
+
+    # Course teams
+    # - 'lms.djangoapps.teams'
+
+    # - 'xblock_django'
+
+    # programs support
+    # - 'openedx.core.djangoapps.programs.apps.ProgramsConfig'
+
+    # Catalog integration
+    # - 'openedx.core.djangoapps.catalog'
+
+    # Self-paced course configuration
+    # - 'openedx.core.djangoapps.self_paced'
+
+    # - 'sorl.thumbnail'
+
+    # edx-milestones service
+    # - 'milestones'
+
+    # Gating of course content
+    # - 'gating.apps.GatingConfig'
+
+    # Static i18n support
+    # - 'statici18n'
+
+    # API access administration
+    # - 'openedx.core.djangoapps.api_admin'
+
+    # Verified Track Content Cohorting (Beta feature that will hopefully be removed)
+    # - 'openedx.core.djangoapps.verified_track_content'
+
+    # Learner's dashboard
+    # - 'learner_dashboard'
+
+    # Needed whether or not enabled, due to migrations
+    # - 'badges.apps.BadgesConfig'
+
+    # Enables default site and redirects
+    - 'django_sites_extensions'
+
+    # Email marketing integration
+    # - 'email_marketing.apps.EmailMarketingConfig'
+
+    # additional release utilities to ease automation
+    # - 'release_util'
+
+    # rule-based authorization
+    - 'rules.apps.AutodiscoverRulesConfig'
+    - 'bridgekeeper'
+
+    # Customized celery tasks, including persisting failed tasks so they can
+    # be retried
+    # - 'celery_utils'
+
+    # Ability to detect and special-case crawler behavior
+    # - 'openedx.core.djangoapps.crawlers'
+
+    # Unusual migrations
+    - 'database_fixups'
+
+    - 'openedx.core.djangoapps.waffle_utils'
+
+    # Course Goals
+    # - 'lms.djangoapps.course_goals.apps.CourseGoalsConfig'
+
+    # Features
+    # - 'openedx.features.calendar_sync'
+    # - 'openedx.features.course_bookmarks'
+    # - 'openedx.features.course_experience'
+    # - 'openedx.features.course_search'
+    # - 'openedx.features.enterprise_support.apps.EnterpriseSupportConfig'
+    # 'openedx.features.learner_profile'
+    # 'openedx.features.course_duration_limits'
+    # 'openedx.features.content_type_gating'
+    # 'openedx.features.discounts'
+
+    # 'experiments'
+
+    # DRF filters
+    - 'django_filters'
+
+    # API Documentation
+    # 'drf_yasg'
+
+    # edx-drf-extensions
+    - 'csrf.apps.CsrfAppConfig'  # Enables frontend apps to retrieve CSRF tokens.
+    # - 'xss_utils'
+
+    # so sample_task is available to celery workers
+    # - 'openedx.core.djangoapps.heartbeat'
+
+    # signal handlers to capture course dates into edx-when
+    # 'openedx.core.djangoapps.course_date_signals'
+
+    # Management of external user ids
+    # 'openedx.core.djangoapps.external_user_ids'
+
+    # Provides api for Demographics support
+    # - 'openedx.core.djangoapps.demographics'
+
+    # Management of per-user schedules
+    # - 'openedx.core.djangoapps.schedules'
+    # - 'rest_framework_jwt'
+
+    # Learning Sequence Navigation
+    # - 'openedx.core.djangoapps.content.learning_sequences.apps.LearningSequencesConfig'
+
+    # - 'ratelimitbackend'

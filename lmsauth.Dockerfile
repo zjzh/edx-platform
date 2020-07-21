@@ -18,37 +18,25 @@ RUN ln -s /usr/bin/python3 /usr/bin/python
 
 WORKDIR /edx/app/edx-platform/edx-platform
 
-COPY ./requirements /edx/app/edx-platform/edx-platform/requirements
-COPY ./nodeenv /edx/app/edx-platform/edx-platform/nodeenv
-COPY ./nodemodules /edx/app/edx-platform/edx-platform/nodemodules
+COPY ./lms/envs /edx/app/edx-platform/edx-platform/lms/envs
+COPY ./requirements/lmsauth.txt /edx/app/edx-platform/edx-platform/requirements/lmsauth.txt
+COPY ./common/lib/safe_lxml /edx/app/edx-platform/edx-platform/common/lib/safe_lxml
+COPY ./openedx/core/djangoapps/user_authn /edx/app/edx-platform/edx-platform/openedx/core/djangoapps/user_authn
 
-ENV PATH /edx/app/edx-platform/nodeenv/bin:${PATH}
-ENV PATH ./node_modules/.bin:${PATH}
 ENV CONFIG_ROOT /edx/etc/
 ENV PATH /edx/app/edx-platform/edx-platform/bin:${PATH}
-ENV SETTINGS production
 
 RUN pip install setuptools==39.0.1 pip==9.0.3
-RUN pip install -r requirements/edx/base.txt
-RUN pip install newrelic
-
-RUN nodeenv /edx/app/edx-platform/nodeenv --node=8.9.3 --prebuilt
-
-RUN npm set progress=false \
-    && npm install
+RUN pip install -r requirements/lmsauth.txt
 
 RUN mkdir -p /edx/etc/
+COPY ./lmsauth.yaml /edx/etc/lmsauth.yaml
 
-EXPOSE 8000
+EXPOSE 18999
 
 
-FROM base as lms
+FROM base as lmsauth
 ENV SERVICE_VARIANT lms
-ENV LMS_CFG /edx/etc/lms.yaml
-CMD gunicorn -c /edx/app/edx-platform/edx-platform/lms/docker_lms_gunicorn_conf.py --name lms --bind=0.0.0.0:8000 --max-requests=1000 --access-logfile - lms.wsgi:application
+ENV LMS_CFG /edx/etc/lmsauth.yaml
+CMD gunicorn -c /edx/app/edx-platform/edx-platform/lms/docker_lms_gunicorn_conf.py --name lms --bind=0.0.0.0:18999 --max-requests=1000 --access-logfile - lmsauth.wsgi:application
 
-
-FROM base as studio
-ENV SERVICE_VARIANT cms
-ENV CMS_CFG /edx/etc/studio.yaml
-CMD gunicorn -c /edx/app/edx-platform/edx-platform/cms/docker_cms_gunicorn_conf.py --name cms --bind=0.0.0.0:8000 --max-requests=1000 --access-logfile - cms.wsgi:application

@@ -32,7 +32,7 @@ from path import Path as path
 from openedx.core.djangoapps.plugins import plugin_settings, constants as plugin_constants
 from openedx.core.lib.derived import derive_settings
 from openedx.core.lib.logsettings import get_logger_config
-from xmodule.modulestore.modulestore_settings import convert_module_store_setting_if_needed
+# from xmodule.modulestore.modulestore_settings import convert_module_store_setting_if_needed
 
 from .common import *
 
@@ -502,7 +502,7 @@ XQUEUE_INTERFACE = AUTH_TOKENS['XQUEUE_INTERFACE']
 
 # Get the MODULESTORE from auth.json, but if it doesn't exist,
 # use the one from common.py
-MODULESTORE = convert_module_store_setting_if_needed(AUTH_TOKENS.get('MODULESTORE', MODULESTORE))
+# MODULESTORE = convert_module_store_setting_if_needed(AUTH_TOKENS.get('MODULESTORE', MODULESTORE))
 MONGODB_LOG = AUTH_TOKENS.get('MONGODB_LOG', {})
 
 EMAIL_HOST_USER = AUTH_TOKENS.get('EMAIL_HOST_USER', '')  # django default is ''

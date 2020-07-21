@@ -1,0 +1,40 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.6
+    container_name: edxplatform.mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: ""
+    volumes:
+      - edxplatform_mysql:/var/lib/mysql
+    # Uncomment these lines to access the database from localhost
+    # ports:
+    #  - "3307:3306"
+
+  lmsauth:
+    image: lmsauth:1.0
+    #build:
+    #  context: .
+    #  dockerfile: lmsauth.Dockerfile
+    container_name: edxplatform.lmsauth
+    hostname: edxplatform.lmsauth
+    volumes:
+      - .:/edx/app/edxapp/edx-platform
+      - ../src:/edx/src:cached
+    # This should be the same as the `CMD` in the devapp build stage
+    # of the Dockerfile
+    command: bash -c 'while true; do python /edx/app/edxapp/edx-platform/manage.py lms runserver 0.0.0.0:18999 --settings devstack_docker; sleep 2; done'
+    ports:
+      - "18999:18999"
+    depends_on:
+      - mysql
+    # Allows attachment to this container using 'docker attach <containerID>'.
+    stdin_open: true
+    tty: true
+    environment:
+      ENABLE_DJANGO_TOOLBAR: 1
+
+volumes:
+  edxplatform_mysql:
