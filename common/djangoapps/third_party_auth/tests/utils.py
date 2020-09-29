@@ -13,7 +13,9 @@ from social_django.models import Partial, UserSocialAuth
 
 from student.tests.factories import UserFactory
 
-from .testutil import ThirdPartyAuthTestMixin
+from unittest import skip
+
+from .testutil import ThirdPartyAuthTestMixin, AUTH_FEATURE_ENABLED, AUTH_FEATURES_KEY
 
 
 @httpretty.activate
@@ -139,3 +141,8 @@ def prepare_saml_response_from_xml(xml, relay_state='testshib'):
         relay_state=OneLogin_Saml2_Utils.escape_url(relay_state),
         saml_response=OneLogin_Saml2_Utils.escape_url(b64encoded_xml)
     )
+
+def skip_tpa_tests():
+    if AUTH_FEATURE_ENABLED:
+        return lambda func: func
+    return skip("%s not enabled" % AUTH_FEATURES_KEY)

@@ -6,9 +6,10 @@ import ddt
 import unittest
 from third_party_auth.identityserver3 import IdentityServer3
 from third_party_auth.tests import testutil
+from third_party_auth.tests.utils import skip_tpa_tests
 
 
-@unittest.skipUnless(testutil.AUTH_FEATURE_ENABLED, testutil.AUTH_FEATURES_KEY + ' not enabled')
+@skip_tpa_tests()
 @ddt.ddt
 class IdentityServer3Test(testutil.TestCase):
     """
