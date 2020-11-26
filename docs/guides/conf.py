@@ -21,7 +21,6 @@ root = Path('../..').abspath()
 sys.path.insert(0, root)
 sys.path.append(root / "docs/guides")
 sys.path.append(root / "common/lib/capa")
-sys.path.append(root / "common/lib/safe_lxml")
 sys.path.append(root / "common/lib/symmath")
 sys.path.append(root / "common/lib/xmodule")
 

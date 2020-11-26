@@ -5,7 +5,7 @@
 
 import pytest
 
-from safe_lxml import defuse_xml_libs
+from openedx.core.lib.safe_lxml import defuse_xml_libs
 
 defuse_xml_libs()
 
