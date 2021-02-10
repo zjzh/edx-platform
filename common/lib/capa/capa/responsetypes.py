@@ -483,7 +483,7 @@ class LoncapaResponse(six.with_metaclass(abc.ABCMeta, object)):
             }
 
             try:
-                safe_exec.safe_exec(
+                globals_dict = safe_exec.safe_exec(
                     code,
                     globals_dict,
                     python_path=self.context['python_path'],

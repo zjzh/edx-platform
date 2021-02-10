@@ -923,7 +923,7 @@ class LoncapaProblem(object):
                 python_path.append("python_lib.zip")
 
             try:
-                safe_exec(
+                context = safe_exec(
                     all_code,
                     context,
                     random_seed=self.seed,

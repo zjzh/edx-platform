@@ -93,9 +93,7 @@ def safe_exec(
     """
     Execute python code safely.
 
-    `code` is the Python code to execute.  It has access to the globals in `globals_dict`,
-    and any changes it makes to those globals are visible in `globals_dict` when this
-    function returns.
+    `code` is the Python code to execute.  It has access to the globals in `globals_dict`.
 
     `random_seed` will be used to see the `random` module available to the code.
 
@@ -120,6 +118,8 @@ def safe_exec(
     caller, that will be used in log messages.
 
     If `unsafely` is true, then the code will actually be executed without sandboxing.
+
+    Returns a dictionary of globals as they were at the end of execution.
     """
     # Check the cache for a previous result.
     if cache:
@@ -133,10 +133,9 @@ def safe_exec(
             # We have a cached result.  The result is a pair: the exception
             # message, if any, else None; and the resulting globals dictionary.
             emsg, cleaned_results = cached
-            globals_dict.update(cleaned_results)
             if emsg:
                 raise SafeExecException(emsg)
-            return
+            return cleaned_results
 
     # Create the complete code we'll run.
     code_prolog = CODE_PROLOG % random_seed
@@ -147,9 +146,9 @@ def safe_exec(
     else:
         exec_fn = codejail_safe_exec
 
-    # Run the code!  Results are side effects in globals_dict.
+    # Run the code!
     try:
-        exec_fn(
+        globals_dict = exec_fn(
             code_prolog + LAZY_IMPORTS + code,
             globals_dict,
             python_path=python_path,
@@ -173,3 +172,5 @@ def safe_exec(
     # If an exception happened, raise it now.
     if emsg:
         raise exception
+
+    return globals_dict

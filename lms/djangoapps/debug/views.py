@@ -34,7 +34,7 @@ def run_python(request):
         py_code = c['code'] = request.POST.get('code')
         g = {}
         try:
-            safe_exec(
+            g = safe_exec(
                 code=py_code,
                 globals_dict=g,
                 slug="debug_run_python",
