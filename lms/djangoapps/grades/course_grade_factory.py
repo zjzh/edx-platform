@@ -10,7 +10,7 @@ from openedx.core.djangoapps.signals.signals import (
     COURSE_GRADE_NOW_PASSED
 )
 
-from .config import assume_zero_if_absent, should_persist_grades
+from .config import assume_zero_if_absent
 from .course_data import CourseData
 from .course_grade import CourseGrade, ZeroCourseGrade
 from .models import PersistentCourseGrade
@@ -146,9 +146,6 @@ class CourseGradeFactory:
         Returns a CourseGrade object based on stored grade information
         for the given user and course.
         """
-        if not should_persist_grades(course_data.course_key):
-            raise PersistentCourseGrade.DoesNotExist
-
         persistent_grade = PersistentCourseGrade.read(user.id, course_data.course_key)
         log.debug('Grades: Read, %s, User: %s, %s', str(course_data), user.id, persistent_grade)
 
@@ -169,8 +166,7 @@ class CourseGradeFactory:
         COURSE_GRADE_NOW_PASSED if learner has passed course or
         COURSE_GRADE_NOW_FAILED if learner is now failing course
         """
-        should_persist = should_persist_grades(course_data.course_key)
-        if should_persist and force_update_subsections:
+        if force_update_subsections:
             prefetch_grade_overrides_and_visible_blocks(user, course_data.course_key)
 
         course_grade = CourseGrade(
@@ -180,7 +176,7 @@ class CourseGradeFactory:
         )
         course_grade = course_grade.update()
 
-        should_persist = should_persist and course_grade.attempted
+        should_persist = course_grade.attempted
         if should_persist:
             course_grade._subsection_grade_factory.bulk_create_unsaved()  # lint-amnesty, pylint: disable=protected-access
             PersistentCourseGrade.update_or_create(
