@@ -23,7 +23,6 @@ WAFFLE_NAMESPACE = 'grades'
 # .. toggle_creation_date: 2017-04-11
 # .. toggle_target_removal_date: None
 # .. toggle_tickets: https://github.com/edx/edx-platform/pull/14771
-# .. toggle_warnings: This requires the PersistentGradesEnabledFlag to be enabled.
 ASSUME_ZERO_GRADE_IF_ABSENT = 'assume_zero_grade_if_absent'
 # .. toggle_name: grades.disable_regrade_on_policy_change
 # .. toggle_implementation: WaffleSwitch

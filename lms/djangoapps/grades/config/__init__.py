@@ -5,7 +5,6 @@ Defines grading configuration.
 
 from django.conf import settings
 
-from lms.djangoapps.grades.config.models import PersistentGradesEnabledFlag
 from lms.djangoapps.grades.config.waffle import ASSUME_ZERO_GRADE_IF_ABSENT
 from lms.djangoapps.grades.config.waffle import waffle as waffle_func
 
@@ -22,8 +21,8 @@ def assume_zero_if_absent(course_key):
     )
 
 
-def should_persist_grades(course_key):
+def should_persist_grades(course_key):  # lint-amnesty, pylint: disable=unused-argument
     """
     Returns whether grades should be persisted.
     """
-    return PersistentGradesEnabledFlag.feature_enabled(course_key)
+    return True
