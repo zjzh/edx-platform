@@ -13,8 +13,6 @@ import ddt
 import six
 from completion.test_utils import CompletionWaffleTestMixin, submit_completions_for_testing
 from django.conf import settings
-from django.test import TestCase
-from django.test.utils import override_settings
 from django.urls import reverse
 from django.utils.timezone import now
 from milestones.tests.utils import MilestonesTestCaseMixin
@@ -38,7 +36,6 @@ from common.djangoapps.student.models import CourseEnrollment, UserProfile
 from common.djangoapps.student.signals import REFUND_ORDER
 from common.djangoapps.student.tests.factories import CourseEnrollmentFactory, UserFactory
 from common.djangoapps.util.milestones_helpers import get_course_milestones, remove_prerequisite_course, set_prerequisite_courses  # lint-amnesty, pylint: disable=line-too-long
-from common.djangoapps.util.testing import UrlResetMixin
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.tests.django_utils import SharedModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
@@ -884,13 +881,3 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
 
             assert expected_button in dashboard_html
             assert unexpected_button not in dashboard_html
-
-
-@unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
-@override_settings(BRANCH_IO_KEY='test_key')
-class TextMeTheAppViewTests(UrlResetMixin, TestCase):
-    """ Tests for the TextMeTheAppView. """
-
-    def test_text_me_the_app(self):
-        response = self.client.get(reverse('text_me_the_app'))
-        self.assertContains(response, 'Send me a text with the link')
