@@ -13,17 +13,6 @@ WAFFLE_NAMESPACE = 'grades'
 
 # Switches
 
-# .. toggle_name: grades.assume_zero_grade_if_absent
-# .. toggle_implementation: WaffleSwitch
-# .. toggle_default: False
-# .. toggle_description: When enabled, an absent grade is assumed to be zero. Alternatively, defining the
-#   `settings.FEATURES["ASSUME_ZERO_GRADE_IF_ABSENT_FOR_ALL_TESTS"]` feature flag in the LMS will enable this feature
-#   for all courses.
-# .. toggle_use_cases: open_edx
-# .. toggle_creation_date: 2017-04-11
-# .. toggle_target_removal_date: None
-# .. toggle_tickets: https://github.com/edx/edx-platform/pull/14771
-ASSUME_ZERO_GRADE_IF_ABSENT = 'assume_zero_grade_if_absent'
 # .. toggle_name: grades.disable_regrade_on_policy_change
 # .. toggle_implementation: WaffleSwitch
 # .. toggle_default: False

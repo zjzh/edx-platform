@@ -12,7 +12,6 @@ from submissions import api as submissions_api
 
 from common.djangoapps.student.models import anonymous_id_for_user
 from lms.djangoapps.courseware.model_data import ScoresClient
-from lms.djangoapps.grades.config import assume_zero_if_absent
 from lms.djangoapps.grades.models import PersistentSubsectionGrade
 from lms.djangoapps.grades.scores import possibly_scored
 from openedx.core.djangoapps.signals.signals import COURSE_ASSESSMENT_GRADE_CHANGED
@@ -41,7 +40,7 @@ class SubsectionGradeFactory:
 
         If read_only is True, doesn't save any updates to the grades.
         force_calculate - If true, will cause this function to return a `CreateSubsectionGrade` object if no cached
-        grade currently exists, even if the assume_zero_if_absent flag is enabled for the course.
+        grade currently exists
         """
         self._log_event(
             log.debug, f"create, read_only: {read_only}, subsection: {subsection.location}", subsection,
@@ -49,7 +48,8 @@ class SubsectionGradeFactory:
 
         subsection_grade = self._get_bulk_cached_grade(subsection)
         if not subsection_grade:
-            if assume_zero_if_absent(self.course_data.course_key) and not force_calculate:
+            # TODO - determine if anyone ever overrides this
+            if not force_calculate:
                 subsection_grade = ZeroSubsectionGrade(subsection, self.course_data)
             else:
                 subsection_grade = CreateSubsectionGrade(

@@ -10,7 +10,6 @@ from openedx.core.djangoapps.signals.signals import (
     COURSE_GRADE_NOW_PASSED
 )
 
-from .config import assume_zero_if_absent
 from .course_data import CourseData
 from .course_grade import CourseGrade, ZeroCourseGrade
 from .models import PersistentCourseGrade
@@ -36,10 +35,7 @@ class CourseGradeFactory:
     ):
         """
         Returns the CourseGrade for the given user in the course.
-        Reads the value from storage.
-        If not in storage, returns a ZeroGrade if ASSUME_ZERO_GRADE_IF_ABSENT.
-        Else if create_if_needed, computes and returns a new value.
-        Else, returns None.
+        Reads the value from storage or creates an initial value of zero.
 
         At least one of course, collected_block_structure, course_structure,
         or course_key should be provided.
@@ -48,12 +44,7 @@ class CourseGradeFactory:
         try:
             return self._read(user, course_data)
         except PersistentCourseGrade.DoesNotExist:
-            if assume_zero_if_absent(course_data.course_key):
-                return self._create_zero(user, course_data)
-            elif create_if_needed:
-                return self._update(user, course_data)
-            else:
-                return None
+            return self._create_zero(user, course_data)
 
     def update(
             self,
