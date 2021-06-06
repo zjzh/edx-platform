@@ -112,6 +112,7 @@ class CoursewareMeta:
         """
         Can this user see the MFE for this course?
         """
+        return True
         return courseware_mfe_is_visible(
             course_key=self.course_key,
             is_global_staff=self.original_user_is_global_staff,

@@ -103,10 +103,15 @@ def generate_offer_data(user, course):
         return None
 
     original, discounted, percentage = _get_discount_prices(user, course, assume_discount=True)
+    # return None
+    from datetime import timedelta
+    from django.utils import timezone
+
 
     return {
         'code': 'BIENVENIDOAEDX' if get_language() == 'es-419' else 'EDXWELCOME',
-        'expiration_date': expiration_date,
+        'expiration_date': timezone.now() + timedelta(minutes=30),
+        # 'expiration_date': expiration_date,
         'original_price': original,
         'discounted_price': discounted,
         'percentage': percentage,

@@ -161,8 +161,8 @@ class OutlineTabView(RetrieveAPIView):
         course_key = CourseKey.from_string(course_key_string)
         course_usage_key = modulestore().make_course_usage_key(course_key)
 
-        if not course_home_mfe_outline_tab_is_active(course_key):
-            raise Http404
+        # if not course_home_mfe_outline_tab_is_active(course_key):
+        #     raise Http404
 
         # Enable NR tracing for this view based on course
         monitoring_utils.set_custom_attribute('course_id', course_key_string)
@@ -276,6 +276,7 @@ class OutlineTabView(RetrieveAPIView):
                 enroll_alert['can_enroll'] = False
 
         data = {
+            # 'access_expiration': None,
             'access_expiration': access_expiration,
             'course_blocks': course_blocks,
             'course_goals': course_goals,
@@ -284,7 +285,8 @@ class OutlineTabView(RetrieveAPIView):
             'enroll_alert': enroll_alert,
             'handouts_html': handouts_html,
             'has_ended': course.has_ended(),
-            'offer': offer_data,
+            # 'offer': offer_data,
+            'offer': None,
             'resume_course': resume_course,
             'welcome_message_html': welcome_message_html,
         }

@@ -133,6 +133,16 @@ def get_access_expiration_data(user, course):
 
     masquerading_expired_course = is_masquerading_as_specific_student(user, course.id) and expiration_date < now
 
+    from datetime import timedelta  
+
+    return {
+        'expiration_date': now + timedelta(minutes=30),
+        'masquerading_expired_course': masquerading_expired_course,
+        'upgrade_deadline': upgrade_deadline,
+        'upgrade_url': verified_upgrade_deadline_link(user, course=course) if upgrade_deadline else None,
+    }
+
+
     return {
         'expiration_date': expiration_date,
         'masquerading_expired_course': masquerading_expired_course,
