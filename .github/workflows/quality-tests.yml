@@ -49,11 +49,7 @@ jobs:
 
     - name: Run Quality Tests
       continue-on-error: true
-      env:
-        TEST_SUITE: quality
-        SHARD: 1
-      run: |
-        ./scripts/generic-ci-tests.sh
+      run: run_paver_quality run_pylint --system=common  || { EXIT=1; }
 
     - name: Save Job Artifacts
       uses: actions/upload-artifact@v2
