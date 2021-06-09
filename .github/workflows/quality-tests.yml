@@ -48,6 +48,7 @@ jobs:
         pip install -r requirements/edx/testing.txt
 
     - name: Run Quality Tests
+      continue-on-error: true
       env:
         TEST_SUITE: quality
         SHARD: 1
