@@ -47,9 +47,18 @@ jobs:
         pip install -r requirements/pip.txt
         pip install -r requirements/edx/testing.txt
 
-    - name: Run JS Tests
+    - name: Run Quality Tests
       env:
         TEST_SUITE: quality
         SHARD: 1
       run: |
         ./scripts/generic-ci-tests.sh
+
+    - name: Save Job Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: Build-Artifacts
+        path: |
+          **/reports/**/*
+          test_root/log/**/*.log
+          *.log
