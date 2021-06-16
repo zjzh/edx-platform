@@ -64,6 +64,7 @@ def connect_to_mongodb(
         if read_preference is not None:
             kwargs['read_preference'] = read_preference
 
+    # breakpoint()
     mongo_conn = pymongo.database.Database(
         mongo_client_class(
             host=host,
@@ -81,6 +82,7 @@ def connect_to_mongodb(
             wait_time=retry_wait_time
         )
     # If credentials were provided, authenticate the user.
+
     if user is not None and password is not None:
         mongo_conn.authenticate(user, password, source=auth_source)
 

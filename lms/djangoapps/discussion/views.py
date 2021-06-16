@@ -54,10 +54,11 @@ from openedx.core.djangoapps.django_comment_common.models import CourseDiscussio
 from openedx.core.djangoapps.django_comment_common.utils import ThreadContext
 from openedx.core.djangoapps.plugin_api.views import EdxFragmentView
 from openedx.features.course_duration_limits.access import generate_course_expired_fragment
+from openedx.core.djangoapps.django_comment_common.mongo_client.db import DiscussionStore
 from xmodule.modulestore.django import modulestore
 
 log = logging.getLogger("edx.discussions")
-
+discussions = DiscussionStore()
 
 THREADS_PER_PAGE = 20
 INLINE_THREADS_PER_PAGE = 20
@@ -159,7 +160,8 @@ def get_threads(request, course, user_info, discussion_id=None, per_page=THREADS
     )
     paginated_results = cc.Thread.search(query_params)
     threads = paginated_results.collection
-
+    mongo_threads = discussions.find_course_threads(query_params)
+    breakpoint()
     # If not provided with a discussion id, filter threads by commentable ids
     # which are accessible to the current user.
     if discussion_id is None:
@@ -258,6 +260,7 @@ def forum_form_discussion(request, course_key):
     """
     course = get_course_with_access(request.user, 'load', course_key, check_if_enrolled=True)
     request.user.is_community_ta = utils.is_user_community_ta(request.user, course.id)
+    breakpoint()
     if request.is_ajax():
         user = cc.User.from_django_user(request.user)
         user_info = user.to_dict()
