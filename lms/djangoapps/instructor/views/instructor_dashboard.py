@@ -6,6 +6,7 @@ Instructor Dashboard Views
 import datetime
 import logging
 import uuid
+import waffle
 from functools import reduce
 from unittest.mock import patch
 
@@ -267,7 +268,11 @@ def _section_special_exams(course, access):
     escalation_email = None
     if proctoring_provider == 'proctortrack':
         escalation_email = course.proctoring_escalation_email
+    enable_instructor_onboarding_api = waffle.switch_is_active(
+        'edx_proctoring.onboarding_profile_instructor_dashboard_api'
+    )
     from edx_proctoring.api import is_backend_dashboard_available
+
 
     section_data = {
         'section_key': 'special_exams',
@@ -277,6 +282,7 @@ def _section_special_exams(course, access):
         'escalation_email': escalation_email,
         'show_dashboard': is_backend_dashboard_available(course_key),
         'show_onboarding': does_backend_support_onboarding(course.proctoring_provider),
+        'use_onboarding_api': enable_instructor_onboarding_api,
     }
     return section_data
 
