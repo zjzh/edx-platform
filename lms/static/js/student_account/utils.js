@@ -22,6 +22,7 @@
                 }
 
                 cookie = document.cookie.match('(^|;)\\s*' + edxUserCookie + '\\s*=\\s*([^;]+)');
+                console.log(cookie);
                 userCookie = cookie ? cookie.pop() : $.cookie(edxUserCookie);
 
                 // returns the user object from cookie. Replaces '054' with ',' and removes '\'
