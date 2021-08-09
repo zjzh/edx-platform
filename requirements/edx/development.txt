@@ -893,7 +893,7 @@ oauthlib==3.0.1
     #   social-auth-core
 openedx-calc==2.0.1
     # via -r requirements/edx/testing.txt
-ora2==3.6.17
+-e git+https://github.com/edx/edx-ora2.git@4a1919898a8c7177da81826a0abaed626874cd3f#egg=ora2
     # via -r requirements/edx/testing.txt
 packaging==21.0
     # via
