@@ -18,6 +18,7 @@ from openedx.core.djangoapps.content.learning_sequences.data import (
     ExamData,
     VisibilityData
 )
+from openedx.core.lib.hash_utils import hash_usage_key
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
 
@@ -291,9 +292,11 @@ def _make_section_data(section, unique_sequences):
                     )
                 )
 
+        sequence_key = _remove_version_info(sequence.location)
         sequences_data.append(
             CourseLearningSequenceData(
-                usage_key=_remove_version_info(sequence.location),
+                usage_key=sequence_key,
+                usage_key_hash=hash_usage_key(sequence_key),
                 title=sequence.display_name_with_default,
                 inaccessible_after_due=sequence.hide_after_due,
                 exam=ExamData(

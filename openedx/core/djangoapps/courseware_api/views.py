@@ -46,9 +46,15 @@ from openedx.core.djangoapps.agreements.api import get_integrity_signature
 from openedx.core.djangoapps.agreements.toggles import is_integrity_signature_enabled
 from openedx.core.djangoapps.courseware_api.utils import get_celebrations_dict
 from openedx.core.djangoapps.programs.utils import ProgramProgressMeter
+from openedx.core.djangoapps.content.learning_sequences.api import (
+    get_learning_sequence,
+    get_learning_sequence_by_hash,
+)
+from openedx.core.djangoapps.content.learning_sequences.data import LearningSequenceData
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
 from openedx.core.lib.courses import get_course_by_id
+from openedx.core.lib.hash_utils import hash_usage_key
 from openedx.features.course_experience import DISPLAY_COURSE_SOCK_FLAG
 from openedx.features.content_type_gating.models import ContentTypeGatingConfig
 from openedx.features.course_duration_limits.access import get_access_expiration_data
@@ -518,14 +524,23 @@ class SequenceMetadata(DeveloperErrorViewMixin, APIView):
         SessionAuthenticationAllowInactiveUser,
     )
 
-    def get(self, request, usage_key_string, *args, **kwargs):  # lint-amnesty, pylint: disable=unused-argument
+    def get(self, request, usage_key_or_hash, **kwargs):
         """
         Return response to a GET request.
         """
+        # Load requested sequence from learning_sequences, trying to interpret
+        # the path param first as a UsageKey, and as then as a hash of a UsageKey.
         try:
-            usage_key = UsageKey.from_string(usage_key_string)
+            usage_key = UsageKey.from_string(usage_key_or_hash)
+            learning_sequence = get_learning_sequence(usage_key)
         except InvalidKeyError:
-            raise NotFound(f"Invalid usage key: '{usage_key_string}'.")  # lint-amnesty, pylint: disable=raise-missing-from
+            try:
+                learning_sequence = get_learning_sequence_by_hash(usage_key_or_hash)
+                usage_key = learning_sequence.usage_key
+            except LearningSequenceData.DoesNotExist:
+                raise NotFound(f"Invalid usage key hash: '{usage_key_or_hash}'.")  # pylint: disable=raise-missing-from
+        except LearningSequenceData.DoesNotExist:
+            raise NotFound(f"Invalid usage key: '{usage_key_or_hash}'.")  # pylint: disable=raise-missing-from
 
         _, request.user = setup_masquerade(
             request,
@@ -544,8 +559,16 @@ class SequenceMetadata(DeveloperErrorViewMixin, APIView):
         view = STUDENT_VIEW
         if request.user.is_anonymous:
             view = PUBLIC_VIEW
+        sequence_data = sequence.get_metadata(view=view)
 
-        return Response(sequence.get_metadata(view=view))
+        # Insert usage_key_hashes of this sequence and its units into the response.
+        # We do this here in order to avoid further complicating seq_module
+        # with details of usage key hashing.
+        sequence_data["usage_key_hash"] = learning_sequence.usage_key_hash
+        for unit_data in sequence_data["items"]:
+            unit_data["usage_key_hash"] = hash_usage_key(unit_data["id"])
+
+        return Response(sequence_data)
 
 
 class Resume(DeveloperErrorViewMixin, APIView):
