@@ -13,3 +13,8 @@ from .sequences import (
     get_learning_sequence,
     get_learning_sequence_by_hash,
 )
+from .key_hashing import (
+    hash_usage_key,
+    USAGE_KEY_HASH_LENGTH,
+    USAGE_KEY_HASH_PATTERN,
+)

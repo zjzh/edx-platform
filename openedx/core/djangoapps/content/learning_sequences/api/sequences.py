@@ -20,24 +20,40 @@ def get_learning_sequence(sequence_key: UsageKey) -> LearningSequenceData:
     """
     try:
         sequence = LearningSequence.objects.get(usage_key=sequence_key)
-    except:
-        raise LearningSequenceData.DoesNotExist(   # pylint: disable=raise-missing-from
+    except LearningSequence.DoesNotExist as exc:
+        raise LearningSequenceData.DoesNotExist(
             f"could not load LearningSequenceData for usage key {sequence_key}"
-        )
+        ) from exc
     return _make_sequence_data(sequence)
 
 
 def get_learning_sequence_by_hash(sequence_key_hash: str) -> LearningSequenceData:
     """
-    Load a generic data for a learning sequence given the hash of its usage key.
+    Load generic data for a learning sequence given the hash of its usage key.
+
+    WARNING! This is an experimental API function!
+    We do not currently handle the case of usage key hash collisions.
+
+    Before considering this API method stable, will either need to:
+    1. confirm that the probability of usage key hash collision (accounting for
+       potentially multiple orders of magnitude of catalog growth) is acceptably
+       small, or
+    2. declare that hash keys are only unique within a given learning context,
+       and update this API function to require a `learning_context_key` argument.
+    See TNL-8638.
     """
-    try:
-        sequence = LearningSequence.objects.get(usage_key_hash=sequence_key_hash)
-    except:
-        raise LearningSequenceData.DoesNotExist(   # pylint: disable=raise-missing-from
+    sequences = LearningSequence.objects.filter(usage_key_hash=sequence_key_hash)
+    if not sequences:
+        raise LearningSequenceData.DoesNotExist(
             f"could not load LearningSequenceData for usage key hash {sequence_key_hash}"
         )
-    return _make_sequence_data(sequence)
+    if len(sequences) > 1:
+        usage_keys_list = ', '.join([sequence.usage_key for sequence in sequences])
+        raise Exception(
+            f"Two or more sequences' usage keys hash to {sequence_key_hash!r}! "
+            f"Colliding usage keys: [{usage_keys_list}]."
+        )
+    return _make_sequence_data(sequences[0])
 
 
 def _make_sequence_data(sequence: LearningSequence) -> LearningSequenceData:

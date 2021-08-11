@@ -45,6 +45,11 @@ from opaque_keys.edx.django.models import (  # lint-amnesty, pylint: disable=unu
 )
 from .data import CourseVisibility
 
+# Length, in characters, of a base64-encoded usage key hash.
+# These hashes are being experimentally used to shorten courseware URLs.
+# See TNL-8638 for more details.
+USAGE_KEY_HASH_LENGTH = 8
+
 
 class LearningContext(TimeStampedModel):
     """
@@ -111,11 +116,16 @@ class LearningSequence(TimeStampedModel):
     learning_context = models.ForeignKey(
         LearningContext, on_delete=models.CASCADE, related_name='sequences'
     )
-    usage_key = UsageKeyField(max_length=255)
+    usage_key = UsageKeyField(max_length=255, unique=True)
 
     # A URL-safe Base64-encoding of a blake2b hash of the usage key.
     # For aesthetic use (eg, as a path parameter, to shorten URLs).
-    usage_key_hash = models.CharField(max_length=255, blank=True, null=True)
+    # This field is experimental. See TNL-8638 for more information.
+    usage_key_hash = models.CharField(
+        max_length=USAGE_KEY_HASH_LENGTH,
+        blank=True,
+        null=True,
+    )
 
     # Yes, it's crazy to have a title 1K chars long. But we have ones at least
     # 270 long, meaning we wouldn't be able to make it indexed anyway in InnoDB.
@@ -124,7 +134,6 @@ class LearningSequence(TimeStampedModel):
     # Separate field for when this Sequence's content was last changed?
     class Meta:
         unique_together = [
-            ['learning_context', 'usage_key'],
             ['learning_context', 'usage_key_hash'],
         ]
 

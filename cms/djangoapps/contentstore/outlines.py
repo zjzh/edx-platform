@@ -8,7 +8,10 @@ from typing import List, Tuple
 
 from edx_django_utils.monitoring import function_trace, set_custom_attribute
 
-from openedx.core.djangoapps.content.learning_sequences.api import replace_course_outline
+from openedx.core.djangoapps.content.learning_sequences.api import (
+    hash_usage_key,
+    replace_course_outline,
+)
 from openedx.core.djangoapps.content.learning_sequences.data import (
     ContentErrorData,
     CourseLearningSequenceData,
@@ -18,7 +21,6 @@ from openedx.core.djangoapps.content.learning_sequences.data import (
     ExamData,
     VisibilityData
 )
-from openedx.core.lib.hash_utils import hash_usage_key
 from xmodule.modulestore import ModuleStoreEnum
 from xmodule.modulestore.django import modulestore
 

@@ -16,7 +16,6 @@ from opaque_keys import OpaqueKey
 from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.locator import LibraryLocator
 from openedx.core import types
-from openedx.core.lib.hash_utils import hash_usage_key
 
 from ..data import (
     ContentErrorData,
@@ -40,6 +39,7 @@ from ..models import (
     PublishReport,
     UserPartitionGroup
 )
+from .key_hashing import hash_usage_key
 from .permissions import can_call_public_api, can_see_all_content
 from .processors.content_gating import ContentGatingOutlineProcessor
 from .processors.enrollment import EnrollmentOutlineProcessor
