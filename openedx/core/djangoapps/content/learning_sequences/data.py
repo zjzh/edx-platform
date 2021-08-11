@@ -20,7 +20,10 @@ Guidelines:
 
 TODO: Validate all datetimes to be UTC.
 """
+import hashlib
 import logging
+import math
+from base64 import urlsafe_b64encode
 from datetime import datetime
 from enum import Enum
 from typing import Dict, FrozenSet, List, Optional
@@ -127,8 +130,16 @@ class LearningSequenceData:
         pass
 
     usage_key = attr.ib(type=UsageKey)
-    usage_key_hash = attr.ib(type=str)
     title = attr.ib(type=str)
+
+    # A URL-safe Base64-encoding of a blake2b hash of the usage key.
+    # For aesthetic use (eg, as a path parameter, to shorten URLs).
+    # This field is experimental. See TNL-8638 for more information.
+    usage_key_hash = attr.ib(type=str)
+
+    @usage_key_hash.default
+    def _get_default_usage_key_hash(self) -> str:
+        return hash_usage_key(self.usage_key)
 
 
 @attr.s(frozen=True)
@@ -374,3 +385,50 @@ class UserCourseOutlineDetailsData:
     outline: UserCourseOutlineData
     schedule: ScheduleData
     special_exam_attempts: SpecialExamAttemptData
+
+
+# Length, in characters, of a base64-encoded usage key hash.
+# These hashes are being experimentally used to shorten courseware URLs.
+# See TNL-8638 for more details.
+USAGE_KEY_HASH_LENGTH = 8
+
+# Number of hash digest bits needed in order to produce a base64-encoded output
+# of length `USAGE_KEY_HASH_LENGTH`.
+# Each base64 character captures 6 bits (because 2 ^ 6 = 64).
+_USAGE_KEY_HASH_BITS = USAGE_KEY_HASH_LENGTH * 6
+
+# Number of hash digest bytes needed in order to produce a base64-encoded output
+# of length `USAGE_KEY_HASH_LENGTH`. Is equal to one eighth of `_USAGE_KEY_HASH_BITS`.
+# In the event that _USAGE_KEY_HASH_BITS is not divisible by 8, we round up.
+# We will cut off the extra any output at the end of `hash_usage_key`.
+_USAGE_KEY_HASH_BYTES = math.ceil(_USAGE_KEY_HASH_BITS / 8)
+
+# A regex to capture strings that could be the output of `hash_usage_key`.
+# Captures a string of length `USAGE_KEY_HASH_LENGTH`, made up of letters,
+# numbers, dashes, underscores, and/or equals signs.
+USAGE_KEY_HASH_PATTERN = rf'(?P<usage_key_hash>[A-Z_a-z0-9=-]{{{USAGE_KEY_HASH_LENGTH}}})'
+
+
+def hash_usage_key(usage_key: UsageKey) -> str:
+    """
+    Get the blake2b hash key for the given usage_key and encode the value.
+
+    Encoding is URL-safe Base64, which includes (case-sensitive) letters,
+    numbers, and the dash (-), underscore (_) and equals (=) characters.
+
+    Args:
+        usage_key: the id of the location to which to generate the path
+
+    Returns:
+        The string of the encoded hashed key, of length `USAGE_KEY_HASH_LENGTH`.
+    """
+    usage_key_bytes = bytes(str(usage_key), 'utf-8')
+    usage_key_hash_bytes = hashlib.blake2b(
+        usage_key_bytes, digest_size=_USAGE_KEY_HASH_BYTES
+    ).digest()
+    encoded_hash_bytes = urlsafe_b64encode(usage_key_hash_bytes)
+    encoded_hash = str(encoded_hash_bytes, 'utf-8')
+    # When `USAGE_KEY_HASH_LENGTH` is divisible by 4,
+    # `encoded_hash` should end up equal to `trimmed_encoded_hash`.
+    trimmed_encoded_hash = encoded_hash[:USAGE_KEY_HASH_LENGTH]
+    return trimmed_encoded_hash

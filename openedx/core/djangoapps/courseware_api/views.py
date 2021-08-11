@@ -49,9 +49,8 @@ from openedx.core.djangoapps.programs.utils import ProgramProgressMeter
 from openedx.core.djangoapps.content.learning_sequences.api import (
     get_learning_sequence,
     get_learning_sequence_by_hash,
-    hash_usage_key,
 )
-from openedx.core.djangoapps.content.learning_sequences.data import LearningSequenceData
+from openedx.core.djangoapps.content.learning_sequences.data import LearningSequenceData, hash_usage_key
 from openedx.core.lib.api.authentication import BearerAuthenticationAllowInactiveUser
 from openedx.core.lib.api.view_utils import DeveloperErrorViewMixin
 from openedx.core.lib.courses import get_course_by_id

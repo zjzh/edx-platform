@@ -8,10 +8,7 @@ from typing import List, Tuple
 
 from edx_django_utils.monitoring import function_trace, set_custom_attribute
 
-from openedx.core.djangoapps.content.learning_sequences.api import (
-    hash_usage_key,
-    replace_course_outline,
-)
+from openedx.core.djangoapps.content.learning_sequences.api import replace_course_outline
 from openedx.core.djangoapps.content.learning_sequences.data import (
     ContentErrorData,
     CourseLearningSequenceData,
@@ -294,11 +291,9 @@ def _make_section_data(section, unique_sequences):
                     )
                 )
 
-        sequence_key = _remove_version_info(sequence.location)
         sequences_data.append(
             CourseLearningSequenceData(
-                usage_key=sequence_key,
-                usage_key_hash=hash_usage_key(sequence_key),
+                usage_key=_remove_version_info(sequence.location),
                 title=sequence.display_name_with_default,
                 inaccessible_after_due=sequence.hide_after_due,
                 exam=ExamData(

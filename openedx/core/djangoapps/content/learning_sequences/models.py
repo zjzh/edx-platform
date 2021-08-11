@@ -43,12 +43,7 @@ from model_utils.models import TimeStampedModel
 from opaque_keys.edx.django.models import (  # lint-amnesty, pylint: disable=unused-import
     LearningContextKeyField, UsageKeyField
 )
-from .data import CourseVisibility
-
-# Length, in characters, of a base64-encoded usage key hash.
-# These hashes are being experimentally used to shorten courseware URLs.
-# See TNL-8638 for more details.
-USAGE_KEY_HASH_LENGTH = 8
+from .data import CourseVisibility, USAGE_KEY_HASH_LENGTH
 
 
 class LearningContext(TimeStampedModel):
@@ -123,8 +118,8 @@ class LearningSequence(TimeStampedModel):
     # This field is experimental. See TNL-8638 for more information.
     usage_key_hash = models.CharField(
         max_length=USAGE_KEY_HASH_LENGTH,
-        blank=True,
         null=True,
+        default=None,
     )
 
     # Yes, it's crazy to have a title 1K chars long. But we have ones at least

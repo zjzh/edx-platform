@@ -16,6 +16,7 @@ from django.test.client import RequestFactory
 from edx_toggles.toggles.testutils import override_waffle_flag
 from common.djangoapps.course_modes.models import CourseMode
 from common.djangoapps.course_modes.tests.factories import CourseModeFactory
+from cms.djangoapps.contentstore.outlines import get_outline_from_modulestore
 from lms.djangoapps.certificates.api import get_certificate_url
 from lms.djangoapps.certificates.tests.factories import (
     GeneratedCertificateFactory, LinkedInAddToProfileConfigurationFactory
@@ -39,6 +40,7 @@ from common.djangoapps.student.roles import CourseInstructorRole
 from common.djangoapps.student.tests.factories import CourseEnrollmentCelebrationFactory, UserFactory
 from openedx.core.djangoapps.agreements.api import create_integrity_signature
 from openedx.core.djangoapps.agreements.toggles import ENABLE_INTEGRITY_SIGNATURE
+from openedx.core.djangoapps.content.learning_sequences.api import replace_course_outline
 from xmodule.data import CertificatesDisplayBehaviors
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.tests.django_utils import TEST_DATA_SPLIT_MODULESTORE, SharedModuleStoreTestCase
@@ -382,6 +384,9 @@ class SequenceApiTestViews(BaseCoursewareTests):
     def setUpClass(cls):
         super().setUpClass()
         cls.url = f'/api/courseware/sequence/{cls.sequence.location}'
+        # Manually ensure that a learning_sequences CourseOutline is created
+        # for `cls.course`.
+        replace_course_outline(get_outline_from_modulestore(cls.course.id)[0])
 
     @classmethod
     def tearDownClass(cls):

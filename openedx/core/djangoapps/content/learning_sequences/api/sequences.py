@@ -22,7 +22,7 @@ def get_learning_sequence(sequence_key: UsageKey) -> LearningSequenceData:
         sequence = LearningSequence.objects.get(usage_key=sequence_key)
     except LearningSequence.DoesNotExist as exc:
         raise LearningSequenceData.DoesNotExist(
-            f"could not load LearningSequenceData for usage key {sequence_key}"
+            f"no such sequence with usage_key='{sequence_key}'"
         ) from exc
     return _make_sequence_data(sequence)
 
@@ -45,7 +45,7 @@ def get_learning_sequence_by_hash(sequence_key_hash: str) -> LearningSequenceDat
     sequences = LearningSequence.objects.filter(usage_key_hash=sequence_key_hash)
     if not sequences:
         raise LearningSequenceData.DoesNotExist(
-            f"could not load LearningSequenceData for usage key hash {sequence_key_hash}"
+            f"no such sequence with usage_key_hash={sequence_key_hash!r}"
         )
     if len(sequences) > 1:
         usage_keys_list = ', '.join([sequence.usage_key for sequence in sequences])
