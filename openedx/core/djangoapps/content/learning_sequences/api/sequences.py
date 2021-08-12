@@ -48,7 +48,9 @@ def get_learning_sequence_by_hash(sequence_key_hash: str) -> LearningSequenceDat
             f"no such sequence with usage_key_hash={sequence_key_hash!r}"
         )
     if len(sequences) > 1:
-        usage_keys_list = ', '.join([sequence.usage_key for sequence in sequences])
+        usage_keys_list = ', '.join([
+            str(sequence.usage_key) for sequence in sequences
+        ])
         raise Exception(
             f"Two or more sequences' usage keys hash to {sequence_key_hash!r}! "
             f"Colliding usage keys: [{usage_keys_list}]."
