@@ -41,6 +41,7 @@ from common.djangoapps.student.tests.factories import CourseEnrollmentCelebratio
 from openedx.core.djangoapps.agreements.api import create_integrity_signature
 from openedx.core.djangoapps.agreements.toggles import ENABLE_INTEGRITY_SIGNATURE
 from openedx.core.djangoapps.content.learning_sequences.api import replace_course_outline
+from openedx.core.djangoapps.content.learning_sequences.data import hash_usage_key
 from xmodule.data import CertificatesDisplayBehaviors
 from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.tests.django_utils import TEST_DATA_SPLIT_MODULESTORE, SharedModuleStoreTestCase
@@ -383,7 +384,10 @@ class SequenceApiTestViews(BaseCoursewareTests):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.url = f'/api/courseware/sequence/{cls.sequence.location}'
+        cls.sequence_key = cls.sequence.location
+        cls.sequence_key_hash = hash_usage_key(cls.sequence.location)
+        cls.url = f'/api/courseware/sequence/{cls.sequence_key}'
+        cls.url_using_hash = f'/api/courseware/sequence/{cls.sequence_key_hash}'
         # Manually ensure that a learning_sequences CourseOutline is created
         # for `cls.course`.
         replace_course_outline(get_outline_from_modulestore(cls.course.id)[0])
@@ -397,7 +401,14 @@ class SequenceApiTestViews(BaseCoursewareTests):
         response = self.client.get(self.url)
         assert response.status_code == 200
         assert response.data['display_name'] == 'sequence'
+        assert response.data['usage_key_hash'] == self.sequence_key_hash
         assert len(response.data['items']) == 1
+
+    def test_sequence_metadata_using_hash(self):
+        response_using_key = self.client.get(self.url)
+        response_using_hash = self.client.get(self.url_using_hash)
+        assert response_using_hash.status_code == 200
+        assert response_using_hash.data == response_using_key.data
 
 
 class ResumeApiTestViews(BaseCoursewareTests, CompletionWaffleTestMixin):
