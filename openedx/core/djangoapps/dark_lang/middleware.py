@@ -128,6 +128,11 @@ class DarkLangMiddleware(MiddlewareMixin):
         a territory of one of those languages.
         """
         accept = request.META.get('HTTP_ACCEPT_LANGUAGE', None)
+
+        # before cleaning out, log a random sample of user-requested languages
+        if random.random() < .05: # capture 5% of requests
+            log.info("User accept-header language was: {lang}".format(accept)
+
         if accept is None or accept == '*':
             return
 
