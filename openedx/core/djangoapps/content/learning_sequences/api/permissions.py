@@ -14,16 +14,6 @@ from common.djangoapps.student.roles import (
 )
 from openedx.core import types
 
-from ..toggles import USE_FOR_OUTLINES
-
-
-def can_call_public_api(course_key: CourseKey) -> bool:
-    """
-    This is only intended for rollout purposes, and eventually everyone will be
-    able to call the public API for all courses.
-    """
-    return USE_FOR_OUTLINES.is_enabled(course_key)
-
 
 def can_see_all_content(requesting_user: types.User, course_key: CourseKey) -> bool:
     """
