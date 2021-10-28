@@ -256,14 +256,12 @@ def should_dump_course(course_key, graph):
 
 @shared_task
 @set_code_owner_attribute
-def dump_course_to_neo4j(course_key_string, credentials):
+def dump_course_to_neo4j(course_key_string):
     """
     Serializes a course and writes it to neo4j.
 
     Arguments:
         course_key: course key for the course to be exported
-        credentials (dict): the necessary credentials to connect
-          to neo4j and create a py2neo `Graph` obje
     """
     course_key = CourseKey.from_string(course_key_string)
     nodes, relationships = serialize_course(course_key)
@@ -274,7 +272,7 @@ def dump_course_to_neo4j(course_key_string, credentials):
         len(relationships),
     )
 
-    graph = authenticate_and_create_graph(credentials)
+    graph = authenticate_and_create_graph()
 
     transaction = graph.begin()
     course_string = str(course_key)
@@ -334,13 +332,11 @@ class ModuleStoreSerializer:
             course_keys = [course_key for course_key in course_keys if course_key not in skip_keys]
         return cls(course_keys)
 
-    def dump_courses_to_neo4j(self, credentials, override_cache=False):
+    def dump_courses_to_neo4j(self, override_cache=False):
         """
         Method that iterates through a list of courses in a modulestore,
         serializes them, then submits tasks to write them to neo4j.
         Arguments:
-            credentials (dict): the necessary credentials to connect
-              to neo4j and create a py2neo `Graph` object
             override_cache: serialize the courses even if they'be been recently
                 serialized
 
@@ -353,7 +349,7 @@ class ModuleStoreSerializer:
         submitted_courses = []
         skipped_courses = []
 
-        graph = authenticate_and_create_graph(credentials)
+        graph = authenticate_and_create_graph()
 
         for index, course_key in enumerate(self.course_keys):
             # first, clear the request cache to prevent memory leaks
@@ -372,36 +368,25 @@ class ModuleStoreSerializer:
                 continue
 
             dump_course_to_neo4j.apply_async(
-                args=[str(course_key), credentials],
+                args=[str(course_key)],
             )
             submitted_courses.append(str(course_key))
 
         return submitted_courses, skipped_courses
 
 
-def authenticate_and_create_graph(credentials):
+def authenticate_and_create_graph():
     """
     This function authenticates with neo4j and creates a py2neo graph object
-    Arguments:
-        credentials (dict): a dictionary of credentials used to authenticate,
-          and then create, a py2neo graph object.
 
     Returns: a py2neo `Graph` object.
     """
-
-    host = credentials['host']
-    port = credentials['port']
-    secure = credentials['secure']
-    neo4j_user = credentials['user']
-    neo4j_password = credentials['password']
-
     graph = Graph(
-        protocol='bolt',
-        password=neo4j_password,
-        user=neo4j_user,
-        address=host,
-        port=port,
-        secure=secure,
+        protocol=COURSEGRAPH_CONNECTION.get("protocol"),
+        password=COURSEGRAPH_CONNECTION.get("password"),
+        user=COURSEGRAPH_CONNECTION.get("user"),
+        address=COURSEGRAPH_CONNECTION.get("address"),
+        port=COURSEGRAPH_CONNECTION.get("port"),
+        secure=COURSEGRAPH_CONNECTION.get("secure"),
     )
-
     return graph

@@ -2175,7 +2175,28 @@ SOFTWARE_SECURE_VERIFICATION_ROUTING_KEY = 'edx.lms.core.default'
 POLICY_CHANGE_TASK_RATE_LIMIT = '300/h'
 
 ############## Settings for CourseGraph ############################
-COURSEGRAPH_JOB_QUEUE = DEFAULT_PRIORITY_QUEUE
+
+# .. setting_name: COURSEGRAPH_JOB_QUEUE
+# .. setting_default: value of DEFAULT_PRIORITY_QUEUE
+# .. setting_description: TODO
+COURSEGRAPH_JOB_QUEUE: str = DEFAULT_PRIORITY_QUEUE
+
+# .. setting_name: COURSEGRAPH_DUMP_COURSE_ON_PUBLISH
+# .. setting_default: False
+# .. setting_description: TODO
+COURSEGRAPH_DUMP_COURSE_ON_PUBLISH: bool = False
+
+# .. setting_name: COURSEGRAPH_CONNECTION
+# .. setting_default: TODO
+# .. setting_description: TODO
+COURSEGRAPH_CONNECTION: dict = {
+    "protocol": "bolt",
+    "host": "localhost:7474",
+    "port": 7687,
+    "user": None,
+    "password": None,
+    "secure": True,
+}
 
 ########## Settings for video transcript migration tasks ############
 VIDEO_TRANSCRIPT_MIGRATIONS_JOB_QUEUE = DEFAULT_PRIORITY_QUEUE

@@ -19,11 +19,6 @@ class Command(BaseCommand):
     Command to dump modulestore data to neo4j
 
     Takes the following named arguments:
-      host: the host of the neo4j server
-      port: the port on the neo4j server that accepts Bolt requests
-      secure: if set, connects to server over Bolt/TLS, otherwise uses Bolt
-      user: the username for the neo4j user
-      password: the user's password
       courses: list of course key strings to serialize. If not specified, all
         courses in the modulestore are serialized.
       override: if true, dump all--or all specified--courses, regardless of when
@@ -37,11 +32,6 @@ class Command(BaseCommand):
     help = dedent(__doc__).strip()
 
     def add_arguments(self, parser):
-        parser.add_argument('--host', type=str)
-        parser.add_argument('--port', type=int, default=7687)
-        parser.add_argument('--secure', action='store_true')
-        parser.add_argument('--user', type=str)
-        parser.add_argument('--password', type=str)
         parser.add_argument('--courses', type=str, nargs='*')
         parser.add_argument('--skip', type=str, nargs='*')
         parser.add_argument(
@@ -59,7 +49,7 @@ class Command(BaseCommand):
         mss = ModuleStoreSerializer.create(options['courses'], options['skip'])
 
         submitted_courses, skipped_courses = mss.dump_courses_to_neo4j(
-            options, override_cache=options['override']
+            override_cache=options['override']
         )
 
         log.info(
