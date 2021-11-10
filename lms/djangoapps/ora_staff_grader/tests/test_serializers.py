@@ -3,13 +3,14 @@ Tests for ESG Serializers
 """
 import ddt
 from django.test import TestCase
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, patch
 
 from lms.djangoapps.ora_staff_grader.serializers import (
     AssessmentCriteriaSerializer,
     CourseMetadataSerializer,
     GradeDataSerializer,
     InitializeSerializer,
+    LockStatusField,
     OpenResponseMetadataSerializer,
     ResponseSerializer,
     ScoreField,
@@ -419,16 +420,31 @@ class TestGradeDataSerializer(TestCase):
         assert data == expected_value
 
 
+@ddt.ddt
 class TestSubmissionDetailResponseSerializer(TestCase):
     """ Tests for SubmissionDetailResponseSerializer """
 
     def test_submission_detail_response_serializer(self):
         """ Base serialization behavior """
         input = MagicMock()
-        data = SubmissionDetailResponseSerializer(input).data
+        serializer = SubmissionDetailResponseSerializer(input)
+        with patch.object(serializer, 'get_gradeStatus') as mock_get_grade_status:
+            data = serializer.data
 
         expected_value = {
-            'gradeData': GradeDataSerializer(input.assessment).data,
-            'response': ResponseSerializer(input.submission).data
+            'gradeData': GradeDataSerializer(input.submission_and_assessment_info.assessment).data,
+            'response': ResponseSerializer(input.submission_and_assessment_info.submission).data,
+            'gradeStatus': mock_get_grade_status.return_value,
+            'lockStatus': LockStatusField().to_representation(input.lock_info.lock_status)
         }
+        mock_get_grade_status.assert_called_once_with(input)
         assert data == expected_value
+
+    @ddt.data(True, False)
+    def test_get__gradeStatus(self, has_assessment):
+        """ Unit test for get_gradeStatus """
+        assessment = {'somekey': 'somevalue'} if has_assessment else {}
+        input = {'submission_and_assessment_info': {'assessment': assessment}}
+        value = SubmissionDetailResponseSerializer().get_gradeStatus(input)
+        expected = 'graded' if has_assessment else 'ungraded'
+        assert value == expected
