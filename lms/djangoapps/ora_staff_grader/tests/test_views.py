@@ -169,7 +169,8 @@ class TestFetchSubmissionView(BaseViewTest):
                 {
                     'name': "Criterion 1",
                     'option': "Three",
-                    'feedback': "Feedback 1"
+                    'feedback': "Feedback 1",
+                    'score': 3,
                 },
             ]
         }

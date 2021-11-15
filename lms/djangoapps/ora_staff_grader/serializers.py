@@ -79,7 +79,7 @@ class SubmissionMetadataSerializer(serializers.Serializer):  # pylint: disable=a
     """
     Submission metadata for displaying submissions table in ESG
     """
-    submissionUuid = serializers.UUIDField()
+    submissionUuid = serializers.CharField()
     username = serializers.CharField(allow_null=True)
     teamName = serializers.CharField(allow_null=True)
     dateSubmitted = serializers.DateTimeField()
@@ -123,7 +123,7 @@ class InitializeSerializer(serializers.Serializer):
 
 class UploadedFileSerializer(serializers.Serializer):
     """ Serializer for a file uploaded as a part of a response """
-    downloadURL = serializers.URLField(source='download_url')
+    downloadUrl = serializers.URLField(source='download_url')
     description = serializers.CharField()
     name = serializers.CharField()
 
@@ -138,8 +138,7 @@ class AssessmentCriteriaSerializer(serializers.Serializer):
     """ Serializer for information about a criterion, in the context of a completed assessment """
     name = serializers.CharField()
     feedback = serializers.CharField()
-    # to be completed in AU-410
-    # score = serializers.IntegerField()
+    score = serializers.IntegerField()
     selectedOption = serializers.CharField(source='option')
 
 

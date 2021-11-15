@@ -328,7 +328,7 @@ class TestUploadedFileSerializer(TestCase):
         data = UploadedFileSerializer(input).data
 
         expected_value = {
-            'downloadURL': str(input.download_url),
+            'downloadUrl': str(input.download_url),
             'description': str(input.description),
             'name': str(input.name),
         }
@@ -367,13 +367,14 @@ class TestAssessmentCriteriaSerializer(TestCase):
 
     def test_assessment_criteria_serializer(self):
         """ Base serialization behavior """
-        input = Mock()
+        input = Mock(score=4)
         data = AssessmentCriteriaSerializer(input).data
 
         expected_value = {
             'name': str(input.name),
             'feedback': str(input.feedback),
             'selectedOption': str(input.option),
+            'score': input.score,
         }
         assert data == expected_value
 
@@ -383,6 +384,7 @@ class TestAssessmentCriteriaSerializer(TestCase):
             'name': 'SomeCriterioOn',
             'feedback': 'Pathetic Effort',
             'option': None,
+            'score': None,
         }
         data = AssessmentCriteriaSerializer(input).data
 
@@ -406,7 +408,7 @@ class TestGradeDataSerializer(TestCase):
         """ Base serialization behavior, with and without criteria """
         input = MagicMock()
         if has_criteria:
-            input.criteria = [Mock(), Mock(), Mock()]
+            input.criteria = [Mock(score=123), Mock(score=22), Mock(score=11)]
         data = GradeDataSerializer(input).data
 
         expected_value = {
