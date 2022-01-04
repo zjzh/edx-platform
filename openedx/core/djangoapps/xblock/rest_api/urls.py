@@ -14,7 +14,7 @@ app_name = 'openedx.core.djangoapps.xblock.rest_api'
 
 urlpatterns = [
     path('api/xblock/v2/', include([
-        path('xblocks/<str:usage_key_str>/', include([
+        path('xblocks/(?P<usage_key_str>[^/]+)/', include([
             # get metadata about an XBlock:
             path('', views.block_metadata),
             # render one of this XBlock's views (e.g. student_view)
