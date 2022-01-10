@@ -27,6 +27,7 @@ jobs:
             "common-1",
             "common-2",
         ]
+      fail-fast: false
 
 
     name: python-${{ matrix.python-version }},django-${{ matrix.django-version }},${{ matrix.shard_name }}
