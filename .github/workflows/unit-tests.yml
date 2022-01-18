@@ -48,7 +48,7 @@ jobs:
 
       - name: set pytest randomly option
         run: |
-          echo "pytest_randomly_option=$(if [ '${{ env.shard_name }}' = 'lms-1' ]; then echo ''; else echo '-p no:randomly' ; fi)" >> $GITHUB_ENV
+          echo "pytest_randomly_option=$(if [ '${{ matrix.shard_name }}' = 'lms-1' ]; then echo ''; else echo '-p no:randomly' ; fi)" >> $GITHUB_ENV
 
       - name: install requirements
         run: |
