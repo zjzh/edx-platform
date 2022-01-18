@@ -7,9 +7,10 @@ from django.test import TestCase
 from opaque_keys.edx.keys import CourseKey
 
 from xmodule.modulestore.django import modulestore
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
 
-class TestDraftModuleStore(TestCase):
+class TestDraftModuleStore(ModuleStoreTestCase):
     """
     Test the draft modulestore
     """
