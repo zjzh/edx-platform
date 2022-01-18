@@ -48,7 +48,7 @@ jobs:
 
       - name: set pytest randomly option
         run: |
-          echo "pytest_randomly_option=$(if [ '${{ env.test_module }}' = *'badges'* ] ]; then echo ''; else echo '-p no:randomly' ; fi)" >> $GITHUB_ENV
+          echo "pytest_randomly_option=$(if [ '${{ env.shard_name }}' = 'lms-1' ] ]; then echo ''; else echo '-p no:randomly' ; fi)" >> $GITHUB_ENV
 
       - name: install requirements
         run: |
@@ -62,7 +62,7 @@ jobs:
 
       - name: run tests
         run: |
-          python -Wd -m pytest -p no:randomly --ds=${{ env.settings_path }} ${{ env.unit_test_paths }}
+          python -Wd -m pytest ${{ env.pytest_randomly_option }} --ds=${{ env.settings_path }} ${{ env.unit_test_paths }}
 
       - name: rename warnings json file
         if: success()
