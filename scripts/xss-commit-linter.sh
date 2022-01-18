@@ -32,17 +32,17 @@ show_help() {
 
 show_verbose() {
     echo "Files linted is based on the following:"
-    echo "- Current commit: ${current_branch_hash}"
-    echo "- Main commit: ${MAIN_COMMIT}"
-    echo "- Target branch: ${TARGET_BRANCH}"
-    echo "- Merge base command: ${merge_base_command}"
-    echo "- Merge base: ${merge_base}"
-    echo "- Diff command: ${diff_command}"
+    echo "- Current commit: $current_branch_hash"
+    echo "- Main commit: $MAIN_COMMIT"
+    echo "- Target branch: $TARGET_BRANCH"
+    echo "- Merge base command: ${merge_base_command[*]}"
+    echo "- Merge base: $merge_base"
+    echo "- Diff command: ${diff_command[*]}"
 
 }
 
 for i in "$@"; do
-    case $i in
+    case "$i" in
         -m=*|--main-branch=*)
             MAIN_COMMIT="${i#*=}"
             shift # past argument=value
@@ -61,22 +61,22 @@ done
 current_branch_hash=`git rev-parse HEAD`
 
 if [ -z "${MAIN_COMMIT+x}" ]; then
-    if [ -z ${TARGET_BRANCH+x} ]; then
+    if [ -z "${TARGET_BRANCH+x}" ]; then
         # if commit is not set and no target branch, get hash of current branch
         MAIN_COMMIT="origin/master"
     else
-        if [[ $TARGET_BRANCH == origin/* ]]; then
-            MAIN_COMMIT=$TARGET_BRANCH
+        if [[ "$TARGET_BRANCH" == origin/* ]]; then
+            MAIN_COMMIT="$TARGET_BRANCH"
         else
-            MAIN_COMMIT=origin/$TARGET_BRANCH
+            MAIN_COMMIT="origin/$TARGET_BRANCH"
         fi
     fi
 fi
 
-merge_base_command="git merge-base $current_branch_hash $MAIN_COMMIT"
-merge_base=$(${merge_base_command})
-diff_command="git diff --name-only --diff-filter=ACM $merge_base $current_branch_hash"
-diff_files=$(${diff_command})
+merge_base_command=(git merge-base "$current_branch_hash" "$MAIN_COMMIT")
+merge_base="$("${merge_base_command[@]}")"
+diff_command=(git diff --name-only "--diff-filter=ACM" "$merge_base" "$current_branch_hash")
+diff_files="$("${diff_command[@]}")"
 
 if [ "$diff_files" = "" ]; then
     # When no files are found, automatically display verbose details to help
@@ -88,6 +88,6 @@ else
     for f in $diff_files; do
         echo ""
         echo "Linting $f:"
-        ./scripts/xsslint/xss_linter.py --config=scripts.xsslint_config $f
+        ./scripts/xsslint/xss_linter.py --config=scripts.xsslint_config "$f"
     done
 fi
