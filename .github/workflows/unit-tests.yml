@@ -64,7 +64,9 @@ jobs:
         env:
           DJANGO_SETTINGS: ${{ env.settings_path }}
         run: |
-          sh run_individual_tests.sh ${{ env.unit_test_paths }}
+          chmod +x ./run_individual_tests.sh
+          ./run_individual_tests.sh ${{ env.unit_test_paths }}
+        shell: bash
 
       - name: run tests
         run: |
