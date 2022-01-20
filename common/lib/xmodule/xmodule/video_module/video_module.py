@@ -691,7 +691,7 @@ class VideoBlock(
             # Mild workaround to ensure that tests pass -- if a field
             # is set to its default value, we don't write it out.
             if value:
-                if key in self.fields and self.fields[key].is_set_on(self):  # lint-amnesty, pylint: disable=unsubscriptable-object, unsupported-membership-test
+                if key in self.fields:  # lint-amnesty, pylint: disable=unsubscriptable-object, unsupported-membership-test
                     try:
                         xml.set(key, str(value))
                     except UnicodeDecodeError:
