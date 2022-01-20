@@ -29,5 +29,8 @@ for file in "${test_files[@]}" ; do
     fi
 done
 
-echo "Following files failed during run"
-printf "\t%s\n" "${failed_files[@]}"
+if (( ${#failed_files[@]} == 0 )); then
+    echo "Following files failed during run"
+    printf "\t%s\n" "${failed_files[@]}"
+    exit 1
+fi

@@ -10,6 +10,7 @@ jobs:
   run-tests:
     runs-on: [ edx-platform-runner ]
     strategy:
+      fail-fast: false
       matrix:
         python-version: ['3.8']
         django-version: ["3.2"]
@@ -61,6 +62,7 @@ jobs:
           echo "unit_test_paths=$(python scripts/unit_test_shards_parser.py --shard-name=${{ matrix.shard_name }} )" >> $GITHUB_ENV
 
       - name: run tests - each module
+        continue-on-error: true
         env:
           DJANGO_SETTINGS: ${{ env.settings_path }}
         run: |
@@ -70,7 +72,7 @@ jobs:
 
       - name: run tests
         run: |
-          python -Wd -m pytest ${{ env.pytest_randomly_option }} --ds=${{ env.settings_path }} ${{ env.unit_test_paths }}
+          python -Wd -m pytest -p no:randomly --ds=${{ env.settings_path }} ${{ env.unit_test_paths }}
 
       - name: rename warnings json file
         if: success()
